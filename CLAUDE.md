@@ -13,6 +13,10 @@ npm run start   # serve the production build
 npm run lint    # ESLint — runs `eslint` directly, NOT `next lint` (removed in Next 16)
 ```
 
+## Skills
+
+Always use `/frontend-design` skill to design user interfaces.
+
 No test runner is configured. If tests are needed, pick and install one before writing test files.
 
 ## What this project is
