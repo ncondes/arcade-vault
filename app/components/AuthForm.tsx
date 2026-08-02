@@ -4,11 +4,11 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-type Tab = "in" | "up";
+export type Tab = "in" | "up";
 
-export default function AuthForm() {
+export default function AuthForm({ initialTab }: { initialTab: Tab }) {
   const router = useRouter();
-  const [tab, setTab] = useState<Tab>("in");
+  const [tab, setTab] = useState<Tab>(initialTab);
   const [user, setUser] = useState("");
   const [pass, setPass] = useState("");
   const [email, setEmail] = useState("");
@@ -16,7 +16,7 @@ export default function AuthForm() {
   // Maqueta: no valida, no registra y no crea sesión. Solo navega.
   const submit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    router.push("/");
+    router.push("/games");
   };
 
   return (
@@ -90,7 +90,7 @@ export default function AuthForm() {
         </form>
 
         <Link
-          href="/"
+          href="/games"
           className="btn ghost"
           style={{ width: "100%", marginTop: 10 }}
         >
