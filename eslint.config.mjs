@@ -12,6 +12,9 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Plantillas de referencia: scripts UMD que toman React y sus componentes
+    // de `window`, no módulos de la aplicación. No se importan desde `app/`.
+    "references/**",
   ]),
 ]);
 

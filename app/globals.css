@@ -29,6 +29,15 @@
   --pixel: var(--font-press-start), "Press Start 2P", system-ui, monospace;
   --mono: var(--font-jetbrains-mono), "JetBrains Mono", "Courier Prime",
     "Courier New", monospace;
+  /* Mismas pilas, pero sin las variables de next/font. Cada variable arrastra
+     su propio fallback métrico ("JetBrains Mono Fallback" / "Press Start 2P
+     Fallback": una Arial con `size-adjust`) que se cuela por delante del resto
+     de la pila. Para los glifos decorativos que las fuentes reales no traen
+     (▲ de la portada de ROCAS, ≡ del menú móvil), ese fallback gana y los
+     dibuja bastante más grandes que la plantilla. Úsalas donde el glifo importe
+     visualmente. `adjustFontFallback: false` no sirve: Turbopack lo ignora. */
+  --mono-glifos: "JetBrains Mono", "Courier Prime", "Courier New", monospace;
+  --pixel-glifos: "Press Start 2P", system-ui, monospace;
 }
 
 /* Expone los tokens a Tailwind: bg-bg-2, text-cyan, border-line, font-pixel… */
@@ -313,6 +322,8 @@
   }
   .av-nav .hamburger {
     display: none;
+    /* El ≡ no está en Press Start 2P: ver --pixel-glifos. */
+    font-family: var(--pixel-glifos);
   }
 
   @media (max-width: 840px) {
@@ -382,6 +393,10 @@
     font-family: var(--pixel);
     font-size: 10px;
     letter-spacing: 0.16em;
+    /* En la plantilla `.btn` siempre es un <button>, que el navegador centra
+       solo. Aquí también lo llevan <a> y <span>, que no lo heredan: se nota
+       cuando la etiqueta parte en dos líneas ("Iniciar Sesión" en móvil). */
+    text-align: center;
     background: transparent;
     color: var(--ink);
     border: 1px solid var(--cyan);
@@ -483,6 +498,9 @@
   .av-hero h1 {
     font-family: var(--pixel);
     font-size: clamp(28px, 6vw, 64px);
+    /* La plantilla hereda el `bold` que el navegador da a <h1>; el preflight de
+       Tailwind lo resetea a `inherit`, así que hay que reponerlo. */
+    font-weight: 700;
     letter-spacing: 0.06em;
     margin: 0;
     background: linear-gradient(180deg, #fff 0%, var(--cyan) 60%, var(--magenta) 110%);
@@ -537,6 +555,9 @@
     background: transparent;
     border: 0;
     outline: 0;
+    /* Mismo caso que el <h1>: la plantilla se apoya en el padding por defecto
+       del <input>, que el preflight de Tailwind pone a 0. */
+    padding: 1px 2px;
     color: var(--ink);
     font-size: 13px;
     letter-spacing: 0.04em;
@@ -820,6 +841,7 @@
     left: 48%;
     top: 44%;
     color: var(--yellow);
+    font-family: var(--mono-glifos);
     font-size: 22px;
     text-shadow: 0 0 8px var(--yellow);
   }

@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { JetBrains_Mono, Press_Start_2P } from "next/font/google";
+import Nav from "@/app/components/Nav";
+import SiteFooter from "@/app/components/SiteFooter";
 import "./globals.css";
 
 // Press Start 2P no es una fuente variable: requiere weight explícito.
@@ -17,7 +19,11 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Arcade Vault",
+  // `template` compone el título de cada ruta: "CAÍDA" -> "CAÍDA · Arcade Vault".
+  title: {
+    default: "Arcade Vault",
+    template: "%s · Arcade Vault",
+  },
   description: "Juega clásicos arcade y compite por el récord más alto.",
 };
 
@@ -34,7 +40,11 @@ export default function RootLayout({
       <body>
         <div className="av-bg" aria-hidden="true" />
         <div className="av-noise" aria-hidden="true" />
-        <div className="av-shell">{children}</div>
+        <div className="av-shell">
+          <Nav />
+          <main className="av-main">{children}</main>
+          <SiteFooter />
+        </div>
       </body>
     </html>
   );
