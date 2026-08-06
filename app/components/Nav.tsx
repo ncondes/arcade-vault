@@ -8,10 +8,13 @@ export default function Nav() {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
 
+  const isHome = pathname === "/";
   // La plantilla marcaba "biblioteca" también en las rutas de detalle y
   // reproductor; con rutas reales eso es todo lo que cuelga de /games.
-  const isLibrary = pathname === "/" || pathname.startsWith("/games");
+  const isLibrary = pathname.startsWith("/games");
   const isHall = pathname === "/hall-of-fame";
+  // No cuelga nada de /about, así que no hace falta `startsWith`.
+  const isAbout = pathname === "/about";
   const isLogin = pathname === "/login";
 
   const close = () => setOpen(false);
@@ -27,11 +30,17 @@ export default function Nav() {
         </Link>
 
         <div className="links">
-          <Link href="/" className={isLibrary ? "active" : ""}>
+          <Link href="/" className={isHome ? "active" : ""}>
+            Inicio
+          </Link>
+          <Link href="/games" className={isLibrary ? "active" : ""}>
             Biblioteca
           </Link>
           <Link href="/hall-of-fame" className={isHall ? "active" : ""}>
             Salón de la Fama
+          </Link>
+          <Link href="/about" className={isAbout ? "active" : ""}>
+            Acerca de
           </Link>
         </div>
 
@@ -64,7 +73,10 @@ export default function Nav() {
         <div className="pixel neon-cyan" style={{ fontSize: 11, marginBottom: 16 }}>
           MENÚ
         </div>
-        <Link href="/" className={isLibrary ? "active" : ""} onClick={close}>
+        <Link href="/" className={isHome ? "active" : ""} onClick={close}>
+          Inicio
+        </Link>
+        <Link href="/games" className={isLibrary ? "active" : ""} onClick={close}>
           Biblioteca
         </Link>
         <Link
@@ -73,6 +85,9 @@ export default function Nav() {
           onClick={close}
         >
           Salón de la Fama
+        </Link>
+        <Link href="/about" className={isAbout ? "active" : ""} onClick={close}>
+          Acerca de
         </Link>
         <Link href="/login" className={isLogin ? "active" : ""} onClick={close}>
           Iniciar Sesión
