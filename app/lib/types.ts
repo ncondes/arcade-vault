@@ -84,3 +84,26 @@ export type TopPlayer = {
 };
 
 export type FaqItem = { q: string; a: string };
+
+/* ===== acerca de y contacto ===== */
+
+/** Los tres iconos SVG de las tarjetas del hero, dibujados en `HighlightIcon`. */
+export type HighlightIconKind = "HEART" | "BROWSER" | "PLANT";
+
+export type Highlight = {
+  icon: HighlightIconKind;
+  /** "HECHO CON ❤️ PARA JUGADORES", ya en mayúsculas */
+  text: string;
+  accent: Accent;
+};
+
+export type ContactTip = {
+  /** "RESPUESTA EN 24-48H", ya en mayúsculas */
+  text: string;
+  /**
+   * El color del punto. El CSS lo escribe con modificadores de una letra
+   * (`.tip-led.y`, `.tip-led.m`, y verde sin modificador); la traducción vive
+   * en el componente, porque el dato dice el color, no la clase.
+   */
+  led: "green" | "yellow" | "magenta";
+};

@@ -12,9 +12,15 @@ import { useEffect, useRef, type ReactNode } from "react";
  */
 export default function Reveal({
   className,
+  decorative,
   children,
 }: {
   className?: string;
+  /**
+   * Marca la sección como `aria-hidden`. La usa el divisor de `/about`, que es
+   * puro adorno. Es opcional: el home no la pasa y se comporta igual que antes.
+   */
+  decorative?: boolean;
   children: ReactNode;
 }) {
   const ref = useRef<HTMLElement>(null);
@@ -42,7 +48,11 @@ export default function Reveal({
   }, []);
 
   return (
-    <section ref={ref} className={className ? `${className} reveal` : "reveal"}>
+    <section
+      ref={ref}
+      className={className ? `${className} reveal` : "reveal"}
+      aria-hidden={decorative ? true : undefined}
+    >
       {children}
     </section>
   );
