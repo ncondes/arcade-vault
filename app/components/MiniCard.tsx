@@ -1,6 +1,5 @@
 import Link from "next/link";
 import type { Game } from "@/app/lib/types";
-
 /**
  * Tarjeta compacta del carril `// 02` del home. En el mockup era un `<div>` con
  * `onClick`; aquí el destino es un enlace de verdad, así que se puede abrir en

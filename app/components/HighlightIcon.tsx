@@ -1,5 +1,4 @@
 import type { HighlightIconKind } from "@/app/lib/types";
-
 /**
  * Iconos pixelados dibujados a base de `<rect>`, uno por tarjeta del hero de
  * `/about`. El relleno es `currentColor`, así que cada icono toma el acento que

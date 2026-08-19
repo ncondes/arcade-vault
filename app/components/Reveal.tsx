@@ -1,7 +1,5 @@
 "use client";
-
 import { useEffect, useRef, type ReactNode } from "react";
-
 /**
  * Envuelve una sección del home y le añade la clase `in` cuando entra en
  * pantalla. El markup y los datos siguen renderizándose en el servidor: aquí
@@ -24,11 +22,9 @@ export default function Reveal({
   children: ReactNode;
 }) {
   const ref = useRef<HTMLElement>(null);
-
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
-
     const io = new IntersectionObserver(
       (entries) => {
         entries.forEach((e) => {
@@ -40,13 +36,11 @@ export default function Reveal({
           }
         });
       },
-      { threshold: 0.12 },
+      { threshold: 0.12 }
     );
-
     io.observe(el);
     return () => io.disconnect();
   }, []);
-
   return (
     <section
       ref={ref}

@@ -1,5 +1,4 @@
 import type { FeatureIconKind } from "@/app/lib/types";
-
 /**
  * Iconos pixelados dibujados a base de `<rect>`, uno por tarjeta de `// 01`.
  * El relleno es `currentColor`, así que cada icono toma el acento que la clase

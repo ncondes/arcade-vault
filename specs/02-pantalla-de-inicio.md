@@ -68,28 +68,28 @@ export type FeatureIconKind = "GAMEPAD" | "FREE" | "TROPHY" | "ROCKET";
 
 export type Feature = {
   icon: FeatureIconKind;
-  title: string;       // "JUEGOS CLÁSICOS"
+  title: string; // "JUEGOS CLÁSICOS"
   desc: string;
-  accent: Accent;      // reutiliza el Accent de la spec 01
+  accent: Accent; // reutiliza el Accent de la spec 01
 };
 
 export type HomeStat = {
-  value: string;       // "8+", "MILES", "GLOBAL" — no es un número
-  unit: string;        // "JUEGOS"
-  note: string;        // "Y CONTANDO"
+  value: string; // "8+", "MILES", "GLOBAL" — no es un número
+  unit: string; // "JUEGOS"
+  note: string; // "Y CONTANDO"
 };
 
 export type RecentScore = {
-  player: string;      // "NEONFOX"
-  gameId: string;      // "caida" — el título sale de GAMES, no se duplica
+  player: string; // "NEONFOX"
+  gameId: string; // "caida" — el título sale de GAMES, no se duplica
   score: number;
-  ago: string;         // "hace 2 min", cadena fija
+  ago: string; // "hace 2 min", cadena fija
   accent: Accent;
 };
 
 export type TopPlayer = {
   player: string;
-  score: number;       // el rango (#01..#05) es el índice + 1
+  score: number; // el rango (#01..#05) es el índice + 1
 };
 
 export type FaqItem = { q: string; a: string };
@@ -128,11 +128,11 @@ Exporta cinco constantes:
 Tres textos de `home.jsx` no se portan literales, porque contradicen datos que la
 propia aplicación muestra a un clic de distancia:
 
-| Mockup | Esta spec | Motivo |
-| --- | --- | --- |
-| `"12+"` JUEGOS | `` `${GAMES.length}+` `` → "8+" | El catálogo tiene 8 juegos. |
-| "Arkanoid, Tetris, Snake y muchos más." | "Bloque Buster, Caída, Serpentina y muchos más." | Son marcas ajenas que el sitio no ofrece; el catálogo usa nombres propios. |
-| "LADDER BOARDS" | "SALÓN DE LA FAMA" | Único título en inglés de una interfaz en español, y nombra con otra palabra una sección que el nav ya llama así. |
+| Mockup                                  | Esta spec                                        | Motivo                                                                                                            |
+| --------------------------------------- | ------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------- |
+| `"12+"` JUEGOS                          | `` `${GAMES.length}+` `` → "8+"                  | El catálogo tiene 8 juegos.                                                                                       |
+| "Arkanoid, Tetris, Snake y muchos más." | "Bloque Buster, Caída, Serpentina y muchos más." | Son marcas ajenas que el sitio no ofrece; el catálogo usa nombres propios.                                        |
+| "LADDER BOARDS"                         | "SALÓN DE LA FAMA"                               | Único título en inglés de una interfaz en español, y nombra con otra palabra una sección que el nav ya llama así. |
 
 ---
 
@@ -162,10 +162,10 @@ de la spec 01 navegables.
      hero, `aria-hidden="true"`.
    - `FeatureIcon.tsx` — Server Component. Los cuatro iconos SVG, tipado con
      `FeatureIconKind` para que el `switch` sea exhaustivo (sin rama `null`).
-   - `MiniCard.tsx` — Server Component. `` <Link href={`/games/${game.id}`}> `` con
+   - `MiniCard.tsx` — Server Component. ``<Link href={`/games/${game.id}`}>`` con
      el markup de `.mini-card`.
-   _Verificación:_ `npx tsc --noEmit` y `npm run lint` sin errores. Ningún
-   componente se usa aún.
+     _Verificación:_ `npx tsc --noEmit` y `npm run lint` sin errores. Ningún
+     componente se usa aún.
 
 4. **Mudanza de la biblioteca a `/games`.** Crear `app/games/page.tsx` con
    `metadata.title = "Biblioteca"` renderizando `<GameLibrary />`. Repuntar a
@@ -405,13 +405,13 @@ de la spec 01 navegables.
 
 ## Riesgos
 
-| Riesgo | Mitigación |
-| --- | --- |
-| `transitionDelay` inline retrasa el `:hover` de las feature cards hasta 240 ms, y en `.stat-block` es inerte porque ese selector no declara ninguna `transition`. En ambos casos el escalonado que pretendía no existe: `.reveal` vive en el `<section>` padre. | **Eliminar los dos `style={{ transitionDelay }}`** al portar. Si más adelante se quiere el escalonado de verdad, se consigue moviendo `.reveal` a cada tarjeta, no con un delay sobre la transición de hover. |
-| `.reveal` con `threshold: 0.12` exige que el 12% de la sección sea visible. Una sección mucho más alta que la ventana —PRECIOS a 375 px, con la tarjeta de plan y tres FAQ apiladas— podría no alcanzar nunca ese porcentaje y quedarse invisible. | Verificar `/` a 375 px de ancho haciendo scroll hasta el final. Si alguna sección no aparece, cambiar a `threshold: 0` con `rootMargin: "0px 0px -10% 0px"`, que dispara en cuanto el borde superior entra. |
-| El fallo del `IntersectionObserver` es silencioso: el contenido está en el HTML, así que `npm run build` pasa, el crawler lo indexa y solo se ve el hueco en el navegador. | El criterio de aceptación "con JavaScript desactivado las siete secciones son visibles" es manual y obligatorio. No hay forma de detectarlo desde la compilación. |
-| Mover la biblioteca a `/games` deja enlaces apuntando al sitio equivocado en cualquier fichero que no esté en la lista de seis. | El criterio `grep -rn 'href="/"' app/` debe devolver solo el logo del nav y el enlace "Inicio". Cualquier otra línea es un enlace olvidado. |
-| El CSS nuevo usa selectores descendientes atados a la estructura exacta del DOM (`.feature-card .ft-title`, `.top-row.top1 .tp-rk`, `.price-card .pc-list li`). Cualquier "mejora" del markup rompe estilos sin error de compilación. | Replicar la jerarquía de `home.jsx` etiqueta por etiqueta. Del CSS anexado no se modifica nada salvo el reformateo. |
+| Riesgo                                                                                                                                                                                                                                                                                                                       | Mitigación                                                                                                                                                                                                                                                |
+| ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `transitionDelay` inline retrasa el `:hover` de las feature cards hasta 240 ms, y en `.stat-block` es inerte porque ese selector no declara ninguna `transition`. En ambos casos el escalonado que pretendía no existe: `.reveal` vive en el `<section>` padre.                                                              | **Eliminar los dos `style={{ transitionDelay }}`** al portar. Si más adelante se quiere el escalonado de verdad, se consigue moviendo `.reveal` a cada tarjeta, no con un delay sobre la transición de hover.                                             |
+| `.reveal` con `threshold: 0.12` exige que el 12% de la sección sea visible. Una sección mucho más alta que la ventana —PRECIOS a 375 px, con la tarjeta de plan y tres FAQ apiladas— podría no alcanzar nunca ese porcentaje y quedarse invisible.                                                                           | Verificar `/` a 375 px de ancho haciendo scroll hasta el final. Si alguna sección no aparece, cambiar a `threshold: 0` con `rootMargin: "0px 0px -10% 0px"`, que dispara en cuanto el borde superior entra.                                               |
+| El fallo del `IntersectionObserver` es silencioso: el contenido está en el HTML, así que `npm run build` pasa, el crawler lo indexa y solo se ve el hueco en el navegador.                                                                                                                                                   | El criterio de aceptación "con JavaScript desactivado las siete secciones son visibles" es manual y obligatorio. No hay forma de detectarlo desde la compilación.                                                                                         |
+| Mover la biblioteca a `/games` deja enlaces apuntando al sitio equivocado en cualquier fichero que no esté en la lista de seis.                                                                                                                                                                                              | El criterio `grep -rn 'href="/"' app/` debe devolver solo el logo del nav y el enlace "Inicio". Cualquier otra línea es un enlace olvidado.                                                                                                               |
+| El CSS nuevo usa selectores descendientes atados a la estructura exacta del DOM (`.feature-card .ft-title`, `.top-row.top1 .tp-rk`, `.price-card .pc-list li`). Cualquier "mejora" del markup rompe estilos sin error de compilación.                                                                                        | Replicar la jerarquía de `home.jsx` etiqueta por etiqueta. Del CSS anexado no se modifica nada salvo el reformateo.                                                                                                                                       |
 | **Incoherencia preexistente que esta spec lleva a la portada:** `game.best` es menor que la fila #01 del ranking de ese mismo juego en los 8 casos (Caída: `best` 184.220 frente a un top de 298.105). El ticker del home publica ahora esos `best` en la página de entrada, junto a un enlace al detalle que los desmiente. | **Fuera de alcance de esta spec** — el defecto está en `seededScores` de la spec 01, no en el home. Queda registrado para la spec que toque los datos: la solución es acotar `seededScores` a `game.best` como techo, o dejar de llamarlo "mejor global". |
 
 ---

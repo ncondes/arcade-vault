@@ -1,13 +1,10 @@
 "use client";
-
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-
 export default function Nav() {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
-
   const isHome = pathname === "/";
   // La plantilla marcaba "biblioteca" también en las rutas de detalle y
   // reproductor; con rutas reales eso es todo lo que cuelga de /games.
@@ -16,9 +13,7 @@ export default function Nav() {
   // No cuelga nada de /about, así que no hace falta `startsWith`.
   const isAbout = pathname === "/about";
   const isLogin = pathname === "/login";
-
   const close = () => setOpen(false);
-
   return (
     <>
       <nav className="av-nav">
@@ -28,7 +23,6 @@ export default function Nav() {
             ARCADE <span className="neon-magenta">VAULT</span>
           </div>
         </Link>
-
         <div className="links">
           <Link href="/" className={isHome ? "active" : ""}>
             Inicio
@@ -43,32 +37,19 @@ export default function Nav() {
             Acerca de
           </Link>
         </div>
-
         <div className="spacer" />
-
         <div className="coin-counter">
           <span className="coin" />
           <span>CRÉDITOS · 03</span>
         </div>
-
         <Link href="/login" className="btn auth-btn">
           Iniciar Sesión
         </Link>
-
-        <button
-          className="btn ghost hamburger"
-          onClick={() => setOpen(true)}
-          aria-label="Menú"
-        >
+        <button className="btn ghost hamburger" onClick={() => setOpen(true)} aria-label="Menú">
           ≡
         </button>
       </nav>
-
-      <div
-        className={"av-mobile-backdrop" + (open ? " open" : "")}
-        onClick={close}
-      />
-
+      <div className={"av-mobile-backdrop" + (open ? " open" : "")} onClick={close} />
       <aside className={"av-mobile-panel" + (open ? " open" : "")}>
         <div className="pixel neon-cyan" style={{ fontSize: 11, marginBottom: 16 }}>
           MENÚ
@@ -79,11 +60,7 @@ export default function Nav() {
         <Link href="/games" className={isLibrary ? "active" : ""} onClick={close}>
           Biblioteca
         </Link>
-        <Link
-          href="/hall-of-fame"
-          className={isHall ? "active" : ""}
-          onClick={close}
-        >
+        <Link href="/hall-of-fame" className={isHall ? "active" : ""} onClick={close}>
           Salón de la Fama
         </Link>
         <Link href="/about" className={isAbout ? "active" : ""} onClick={close}>

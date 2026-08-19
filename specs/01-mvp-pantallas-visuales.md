@@ -64,26 +64,32 @@ export type Category = "ARCADE" | "PUZZLE" | "SHOOTER" | "VERSUS";
 export type CategoryFilter = "TODOS" | Category;
 export type Accent = "cyan" | "magenta" | "yellow" | "green";
 export type CoverClass =
-  | "cover-bricks" | "cover-tetro" | "cover-snake" | "cover-glot"
-  | "cover-invaders" | "cover-rocas" | "cover-rana" | "cover-duelo";
+  | "cover-bricks"
+  | "cover-tetro"
+  | "cover-snake"
+  | "cover-glot"
+  | "cover-invaders"
+  | "cover-rocas"
+  | "cover-rana"
+  | "cover-duelo";
 
 export type Game = {
-  id: string;          // slug de la URL: /games/bloque-buster
-  title: string;       // "BLOQUE BUSTER", ya en mayúsculas
-  short: string;       // una línea, para la tarjeta
-  long: string;        // párrafo, para el detalle
+  id: string; // slug de la URL: /games/bloque-buster
+  title: string; // "BLOQUE BUSTER", ya en mayúsculas
+  short: string; // una línea, para la tarjeta
+  long: string; // párrafo, para el detalle
   cat: Category;
-  cover: CoverClass;   // clase CSS de la portada, ya existe en globals.css
-  color: Accent;       // acento del botón JUGAR de la tarjeta
-  best: number;        // 28450 -> se muestra con toLocaleString("es-ES")
-  plays: string;       // "12.4K", ya viene formateado; NO es un número
+  cover: CoverClass; // clase CSS de la portada, ya existe en globals.css
+  color: Accent; // acento del botón JUGAR de la tarjeta
+  best: number; // 28450 -> se muestra con toLocaleString("es-ES")
+  plays: string; // "12.4K", ya viene formateado; NO es un número
 };
 
 export type ScoreRow = {
   rank: number;
-  name: string;        // "PX_KAI"
+  name: string; // "PX_KAI"
   score: number;
-  date: string;        // "07/03/2026", ya formateado
+  date: string; // "07/03/2026", ya formateado
 };
 ```
 
@@ -323,11 +329,11 @@ Cada paso deja el proyecto compilando y navegable. Se ejecutan en orden.
 
 ## Riesgos
 
-| Riesgo | Mitigación |
-| --- | --- |
-| `toLocaleString("es-ES")` depende de los datos ICU disponibles. Si el Node que renderiza y el navegador difieren, "184.220" se convierte en una advertencia de hidratación en las 4 pantallas que muestran puntuaciones. | Si aparece la advertencia, sustituir por un helper `formatScore` en `app/lib/format.ts` que inserte el separador de millar a mano. Decisión aplazada hasta verla, para no añadir código preventivo. |
-| `globals.css` usa selectores descendientes atados a la estructura exacta del DOM (`.card .row`, `.hall-table .tr`, `.podium .rank-num`). Cualquier "mejora" del markup rompe estilos en silencio, sin error de compilación. | Replicar la jerarquía de elementos de las plantillas, etiqueta por etiqueta. `globals.css` no se modifica en esta spec. |
-| El bloque `prefers-reduced-motion` de `globals.css:1699` anula animaciones y transiciones CSS, pero **no** el `transform` que `GameCard` escribe desde JavaScript. Un usuario con movimiento reducido seguiría viendo las tarjetas inclinarse. | En `GameCard`, salir de `onMouseMove` si `window.matchMedia("(prefers-reduced-motion: reduce)").matches`. Son dos líneas y cierran el hueco. |
+| Riesgo                                                                                                                                                                                                                                         | Mitigación                                                                                                                                                                                          |
+| ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `toLocaleString("es-ES")` depende de los datos ICU disponibles. Si el Node que renderiza y el navegador difieren, "184.220" se convierte en una advertencia de hidratación en las 4 pantallas que muestran puntuaciones.                       | Si aparece la advertencia, sustituir por un helper `formatScore` en `app/lib/format.ts` que inserte el separador de millar a mano. Decisión aplazada hasta verla, para no añadir código preventivo. |
+| `globals.css` usa selectores descendientes atados a la estructura exacta del DOM (`.card .row`, `.hall-table .tr`, `.podium .rank-num`). Cualquier "mejora" del markup rompe estilos en silencio, sin error de compilación.                    | Replicar la jerarquía de elementos de las plantillas, etiqueta por etiqueta. `globals.css` no se modifica en esta spec.                                                                             |
+| El bloque `prefers-reduced-motion` de `globals.css:1699` anula animaciones y transiciones CSS, pero **no** el `transform` que `GameCard` escribe desde JavaScript. Un usuario con movimiento reducido seguiría viendo las tarjetas inclinarse. | En `GameCard`, salir de `onMouseMove` si `window.matchMedia("(prefers-reduced-motion: reduce)").matches`. Son dos líneas y cierran el hueco.                                                        |
 
 ---
 

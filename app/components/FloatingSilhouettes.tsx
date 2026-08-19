@@ -24,7 +24,6 @@ export default function FloatingSilhouettes() {
           <rect x="30" y="20" width="4" height="4" />
         </g>
       </svg>
-
       {/* s2: Invasor */}
       <svg className="silo s2" viewBox="0 0 32 32">
         <g fill="#ff006e">
@@ -37,7 +36,6 @@ export default function FloatingSilhouettes() {
           <rect x="26" y="20" width="6" height="6" />
         </g>
       </svg>
-
       {/* s3: Cangrejo */}
       <svg className="silo s3" viewBox="0 0 32 32">
         <g fill="#f5ff00">
@@ -51,7 +49,6 @@ export default function FloatingSilhouettes() {
           <rect x="22" y="24" width="4" height="4" />
         </g>
       </svg>
-
       {/* s4: Mira */}
       <svg className="silo s4" viewBox="0 0 24 24">
         <g fill="#00ff88">
@@ -60,7 +57,6 @@ export default function FloatingSilhouettes() {
           <rect x="6" y="6" width="12" height="12" fill="none" stroke="#00ff88" strokeWidth="2" />
         </g>
       </svg>
-
       {/* s5: UFO / platillo */}
       <svg className="silo s5" viewBox="0 0 36 24">
         <g fill="#aa00ff">
@@ -73,7 +69,6 @@ export default function FloatingSilhouettes() {
           <rect x="26" y="18" width="4" height="2" />
         </g>
       </svg>
-
       {/* s6: Moneda */}
       <svg className="silo s6" viewBox="0 0 20 20">
         <g fill="#ffcf3a">
@@ -85,7 +80,6 @@ export default function FloatingSilhouettes() {
           <rect x="8" y="4" width="4" height="12" fill="#0a0a0f" />
         </g>
       </svg>
-
       {/* s7: Corazón pixel */}
       <svg className="silo s7" viewBox="0 0 24 22">
         <g fill="#ff3060">
@@ -101,7 +95,6 @@ export default function FloatingSilhouettes() {
           <rect x="10" y="20" width="4" height="2" />
         </g>
       </svg>
-
       {/* s8: D-pad */}
       <svg className="silo s8" viewBox="0 0 24 24">
         <g fill="#00d4ff">

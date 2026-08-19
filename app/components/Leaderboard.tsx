@@ -1,5 +1,4 @@
 import type { ScoreRow } from "@/app/lib/types";
-
 /** Las tres primeras filas llevan clase propia (`top1`/`top2`/`top3`) en globals.css. */
 function podiumClass(index: number) {
   if (index === 0) return " top1";
@@ -7,7 +6,6 @@ function podiumClass(index: number) {
   if (index === 2) return " top3";
   return "";
 }
-
 export default function Leaderboard({ rows }: { rows: ScoreRow[] }) {
   return (
     <div className="leaderboard">

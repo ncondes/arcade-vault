@@ -1,12 +1,5 @@
 import { GAMES } from "@/app/lib/games";
-import type {
-  FaqItem,
-  Feature,
-  HomeStat,
-  RecentScore,
-  TopPlayer,
-} from "@/app/lib/types";
-
+import type { FaqItem, Feature, HomeStat, RecentScore, TopPlayer } from "@/app/lib/types";
 /**
  * Datos de la pantalla de inicio. Todo son literales estáticos: no hay backend,
  * no se persiste nada y nada se recalcula en tiempo de ejecución.
@@ -14,7 +7,6 @@ import type {
  * La dependencia va en un solo sentido: este fichero importa de `games.ts`,
  * nunca al revés.
  */
-
 export const FEATURES: Feature[] = [
   {
     icon: "GAMEPAD",
@@ -45,7 +37,6 @@ export const FEATURES: Feature[] = [
     accent: "green",
   },
 ];
-
 export const HOME_STATS: HomeStat[] = [
   // El mockup decía "12+" con 8 juegos en el catálogo, y la biblioteca que
   // desmiente esa cifra está a un clic. Se deriva de GAMES para que no vuelva
@@ -54,7 +45,6 @@ export const HOME_STATS: HomeStat[] = [
   { value: "MILES", unit: "DE PARTIDAS", note: "JUGADAS CADA DÍA" },
   { value: "GLOBAL", unit: "RANKING", note: "COMPITE CON EL MUNDO" },
 ];
-
 /**
  * Ticker de "últimas puntuaciones". Los `ago` son cadenas fijas: no hay
  * temporizador ni `Date` detrás.
@@ -72,7 +62,6 @@ export const RECENT_SCORES: RecentScore[] = [
   { player: "ARKADYA", gameId: "serpentina", score: 7820, ago: "hace 24 min", accent: "green" },
   { player: "CYBER_LU", gameId: "ranaria", score: 18900, ago: "hace 31 min", accent: "yellow" },
 ];
-
 /** Ya ordenados de mayor a menor: el rango sale del índice. */
 export const TOP_PLAYERS: TopPlayer[] = [
   { player: "NEONFOX", score: 312840 },
@@ -81,7 +70,6 @@ export const TOP_PLAYERS: TopPlayer[] = [
   { player: "VAULT_07", score: 154300 },
   { player: "GLITCHA", score: 138900 },
 ];
-
 export const FAQ: FaqItem[] = [
   {
     q: "¿REALMENTE ES GRATIS?",

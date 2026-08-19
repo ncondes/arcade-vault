@@ -1,5 +1,4 @@
 import type { CategoryFilter, Game } from "@/app/lib/types";
-
 export const GAMES: Game[] = [
   {
     id: "bloque-buster",
@@ -90,7 +89,6 @@ export const GAMES: Game[] = [
     plays: "4.2K",
   },
 ];
-
 export const CATEGORY_FILTERS: CategoryFilter[] = [
   "TODOS",
   "ARCADE",
@@ -98,7 +96,6 @@ export const CATEGORY_FILTERS: CategoryFilter[] = [
   "SHOOTER",
   "VERSUS",
 ];
-
 export function getGame(id: string): Game | undefined {
   return GAMES.find((g) => g.id === id);
 }

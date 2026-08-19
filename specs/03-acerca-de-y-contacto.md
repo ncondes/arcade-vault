@@ -91,13 +91,13 @@ export type HighlightIconKind = "HEART" | "BROWSER" | "PLANT";
 
 export type Highlight = {
   icon: HighlightIconKind;
-  text: string;        // "HECHO CON ❤️ PARA JUGADORES"
-  accent: Accent;      // reutiliza el Accent de la spec 01
+  text: string; // "HECHO CON ❤️ PARA JUGADORES"
+  accent: Accent; // reutiliza el Accent de la spec 01
 };
 
 export type ContactTip = {
-  text: string;                                  // "RESPUESTA EN 24-48H"
-  led: "green" | "yellow" | "magenta";           // el color del punto
+  text: string; // "RESPUESTA EN 24-48H"
+  led: "green" | "yellow" | "magenta"; // el color del punto
 };
 ```
 
@@ -119,9 +119,9 @@ export type ContactValues = { name: string; email: string; message: string };
 
 export type ContactState =
   | { status: "idle" }
-  | { status: "sent"; name: string }                                    // terminal verde
-  | { status: "invalid"; message: string; values: ContactValues }       // shake + aviso
-  | { status: "failed"; values: ContactValues };                        // terminal magenta
+  | { status: "sent"; name: string } // terminal verde
+  | { status: "invalid"; message: string; values: ContactValues } // shake + aviso
+  | { status: "failed"; values: ContactValues }; // terminal magenta
 ```
 
 Reglas:
@@ -141,12 +141,12 @@ Reglas:
 
 ### Validación en servidor
 
-| Campo | Regla | Mensaje |
-| --- | --- | --- |
-| `name` | 1–80 tras `trim()` | `EL NOMBRE ES OBLIGATORIO` |
-| `email` | `/^[^\s@]+@[^\s@]+\.[^\s@]+$/` y ≤ 254 | `CORREO NO VÁLIDO` |
-| `message` | 1–5000 tras `trim()` | `EL MENSAJE ES OBLIGATORIO` |
-| `website` | debe llegar vacío | — (se responde `sent` sin enviar nada) |
+| Campo     | Regla                                  | Mensaje                                |
+| --------- | -------------------------------------- | -------------------------------------- |
+| `name`    | 1–80 tras `trim()`                     | `EL NOMBRE ES OBLIGATORIO`             |
+| `email`   | `/^[^\s@]+@[^\s@]+\.[^\s@]+$/` y ≤ 254 | `CORREO NO VÁLIDO`                     |
+| `message` | 1–5000 tras `trim()`                   | `EL MENSAJE ES OBLIGATORIO`            |
+| `website` | debe llegar vacío                      | — (se responde `sent` sin enviar nada) |
 
 ### Correo enviado
 
@@ -234,7 +234,7 @@ llega escribiendo la URL, y eso es deliberado.
    dirigida al visitante.
 
 8. **Navegación.** En `app/components/Nav.tsx`, añadir `const isAbout =
-   pathname === "/about"` y el enlace `Acerca de` como cuarto de la lista, en
+pathname === "/about"` y el enlace `Acerca de` como cuarto de la lista, en
    escritorio y en el panel móvil, igual que `nav.jsx:20,41`.
    _Verificación:_ el nav muestra cuatro enlaces, `Acerca de` se marca en
    `/about`, y a 900 px de ancho los cuatro caben sin desbordar ni solapar el
@@ -481,15 +481,15 @@ llega escribiendo la URL, y eso es deliberado.
 
 ## Riesgos
 
-| Riesgo | Mitigación |
-| --- | --- |
-| **`onboarding@resend.dev` solo entrega al correo dueño de la cuenta de Resend.** Si `CONTACT_TO_EMAIL` es cualquier otra dirección, Resend responde 403 y el formulario muestra la terminal de fallo para todo el mundo, siempre. Es el fallo más probable al probarlo por primera vez, y desde el navegador se ve idéntico a "la clave está mal". | `CONTACT_TO_EMAIL` debe ser exactamente el correo de la cuenta de Resend. El `console.error` del servidor lleva el motivo real de Resend, que sí distingue 403 de 401. Se levanta el día que haya dominio verificado. |
-| **Las variables de entorno viven en `.env`, que no se versiona.** Al desplegar, `RESEND_API_KEY` y `CONTACT_TO_EMAIL` no viajan con el código: hay que declararlas en el panel del proveedor. Si se olvidan, la aplicación despliega sin errores y el formulario falla en producción y solo ahí. | `.env.example` documenta las dos claves. El criterio "con `RESEND_API_KEY` borrada, `/about` carga igual y el envío muestra `[FAIL]`" describe exactamente lo que se verá si pasa. |
-| **El formulario vive dentro de una sección `.reveal`, es decir con `opacity: 0` hasta que el `IntersectionObserver` la revela.** Si el JavaScript no se desactiva sino que *falla* —un error en otro componente, una extensión que rompe el bundle—, el `<noscript>` no se aplica y el formulario queda invisible aunque esté en el HTML. El build pasa y el crawler lo indexa. | Es el mismo riesgo que la spec 02 aceptó para el home, ahora sobre un formulario. El criterio de "sin JavaScript" es manual y obligatorio. No hay forma de detectarlo desde la compilación. |
-| **La sección de contacto a 375 px queda muy alta**: intro, tres tips y formulario apilados en una columna. Con `threshold: 0.12`, una sección mucho más alta que la ventana puede no alcanzar nunca ese 12% y quedarse invisible. | Mismo riesgo y misma mitigación que la spec 02: verificar `/about` a 375 px haciendo scroll hasta el final. Si no aparece, cambiar a `threshold: 0` con `rootMargin: "0px 0px -10% 0px"`. Cambiar `Reveal` afecta también al home. |
-| **El honeypot es toda la protección que hay.** Un bot que rellene solo los campos visibles pasa, y cada mensaje que pasa es un correo enviado contra la cuota de Resend. El plan gratuito son 100 correos al día. | Aceptado a sabiendas. Si llega spam, el límite por IP o el captcha van en su propia spec. Mientras tanto, agotar la cuota se manifiesta como terminal de fallo, no como caída. |
-| **No queda registro de los mensajes.** El correo es el único ejemplar. Si Resend lo acepta y luego rebota, o si acaba en spam, el mensaje se pierde y nadie se entera: el visitante vio la terminal verde. | Fuera de alcance de esta spec. Queda anotado para la que traiga base de datos: persistir antes de enviar es lo que convierte el correo en una notificación en vez de en el único ejemplar. |
-| **`app/actions/contact.ts` es el primer fichero del proyecto que lee un secreto.** Si alguien lo importa desde un Client Component sin `"use server"`, la clave entraría en el bundle. | La directiva `"use server"` al principio del fichero convierte cada export en una frontera de red: Next no permite que el cuerpo llegue al cliente. El criterio `grep -rn "RESEND_API_KEY\|CONTACT_TO_EMAIL" app/` debe devolver solo líneas de ese fichero. |
+| Riesgo                                                                                                                                                                                                                                                                                                                                                                          | Mitigación                                                                                                                                                                                                                                                   |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **`onboarding@resend.dev` solo entrega al correo dueño de la cuenta de Resend.** Si `CONTACT_TO_EMAIL` es cualquier otra dirección, Resend responde 403 y el formulario muestra la terminal de fallo para todo el mundo, siempre. Es el fallo más probable al probarlo por primera vez, y desde el navegador se ve idéntico a "la clave está mal".                              | `CONTACT_TO_EMAIL` debe ser exactamente el correo de la cuenta de Resend. El `console.error` del servidor lleva el motivo real de Resend, que sí distingue 403 de 401. Se levanta el día que haya dominio verificado.                                        |
+| **Las variables de entorno viven en `.env`, que no se versiona.** Al desplegar, `RESEND_API_KEY` y `CONTACT_TO_EMAIL` no viajan con el código: hay que declararlas en el panel del proveedor. Si se olvidan, la aplicación despliega sin errores y el formulario falla en producción y solo ahí.                                                                                | `.env.example` documenta las dos claves. El criterio "con `RESEND_API_KEY` borrada, `/about` carga igual y el envío muestra `[FAIL]`" describe exactamente lo que se verá si pasa.                                                                           |
+| **El formulario vive dentro de una sección `.reveal`, es decir con `opacity: 0` hasta que el `IntersectionObserver` la revela.** Si el JavaScript no se desactiva sino que _falla_ —un error en otro componente, una extensión que rompe el bundle—, el `<noscript>` no se aplica y el formulario queda invisible aunque esté en el HTML. El build pasa y el crawler lo indexa. | Es el mismo riesgo que la spec 02 aceptó para el home, ahora sobre un formulario. El criterio de "sin JavaScript" es manual y obligatorio. No hay forma de detectarlo desde la compilación.                                                                  |
+| **La sección de contacto a 375 px queda muy alta**: intro, tres tips y formulario apilados en una columna. Con `threshold: 0.12`, una sección mucho más alta que la ventana puede no alcanzar nunca ese 12% y quedarse invisible.                                                                                                                                               | Mismo riesgo y misma mitigación que la spec 02: verificar `/about` a 375 px haciendo scroll hasta el final. Si no aparece, cambiar a `threshold: 0` con `rootMargin: "0px 0px -10% 0px"`. Cambiar `Reveal` afecta también al home.                           |
+| **El honeypot es toda la protección que hay.** Un bot que rellene solo los campos visibles pasa, y cada mensaje que pasa es un correo enviado contra la cuota de Resend. El plan gratuito son 100 correos al día.                                                                                                                                                               | Aceptado a sabiendas. Si llega spam, el límite por IP o el captcha van en su propia spec. Mientras tanto, agotar la cuota se manifiesta como terminal de fallo, no como caída.                                                                               |
+| **No queda registro de los mensajes.** El correo es el único ejemplar. Si Resend lo acepta y luego rebota, o si acaba en spam, el mensaje se pierde y nadie se entera: el visitante vio la terminal verde.                                                                                                                                                                      | Fuera de alcance de esta spec. Queda anotado para la que traiga base de datos: persistir antes de enviar es lo que convierte el correo en una notificación en vez de en el único ejemplar.                                                                   |
+| **`app/actions/contact.ts` es el primer fichero del proyecto que lee un secreto.** Si alguien lo importa desde un Client Component sin `"use server"`, la clave entraría en el bundle.                                                                                                                                                                                          | La directiva `"use server"` al principio del fichero convierte cada export en una frontera de red: Next no permite que el cuerpo llegue al cliente. El criterio `grep -rn "RESEND_API_KEY\|CONTACT_TO_EMAIL" app/` debe devolver solo líneas de ese fichero. |
 
 ---
 
