@@ -4,28 +4,22 @@ import { notFound } from "next/navigation";
 import Leaderboard from "@/app/components/Leaderboard";
 import { GAMES, getGame } from "@/app/lib/games";
 import { gameSeed, seededScores } from "@/app/lib/scores";
-
 type Props = { params: Promise<{ id: string }> };
-
 // Los 8 juegos son datos estáticos: se prerenderizan en build.
 // Un id desconocido sigue resolviéndose bajo demanda y cae en notFound().
 export function generateStaticParams() {
   return GAMES.map((g) => ({ id: g.id }));
 }
-
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
   const game = getGame(id);
   return { title: game?.title ?? "Juego no encontrado" };
 }
-
 export default async function GameDetailPage({ params }: Props) {
   const { id } = await params;
   const game = getGame(id);
   if (!game) notFound();
-
   const scores = seededScores(gameSeed(game.id) * 17 + 3, 10);
-
   return (
     <div className="av-detail fade-in">
       <div>
@@ -81,7 +75,6 @@ export default async function GameDetailPage({ params }: Props) {
           </div>
         </div>
       </div>
-
       <aside>
         <Leaderboard rows={scores} />
       </aside>

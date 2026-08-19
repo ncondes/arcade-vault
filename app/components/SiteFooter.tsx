@@ -9,11 +9,8 @@ const footerStyle: React.CSSProperties = {
   fontSize: 11,
   letterSpacing: "0.16em",
 };
-
 export default function SiteFooter() {
   return (
-    <footer style={footerStyle}>
-      © 2026 ARCADE VAULT · HECHO CON PIXELES Y NEÓN · v2.6.0
-    </footer>
+    <footer style={footerStyle}>© 2026 ARCADE VAULT · HECHO CON PIXELES Y NEÓN · v2.6.0</footer>
   );
 }

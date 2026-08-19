@@ -1,24 +1,19 @@
 "use client";
-
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-
 export type Tab = "in" | "up";
-
 export default function AuthForm({ initialTab }: { initialTab: Tab }) {
   const router = useRouter();
   const [tab, setTab] = useState<Tab>(initialTab);
   const [user, setUser] = useState("");
   const [pass, setPass] = useState("");
   const [email, setEmail] = useState("");
-
   // Maqueta: no valida, no registra y no crea sesión. Solo navega.
   const submit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     router.push("/games");
   };
-
   return (
     <div className="av-auth-wrap fade-in">
       <div className="auth-card">
@@ -37,7 +32,6 @@ export default function AuthForm({ initialTab }: { initialTab: Tab }) {
             ACCESO AL SISTEMA · v2.6
           </div>
         </div>
-
         <div className="auth-tabs">
           <button className={tab === "in" ? "on" : ""} onClick={() => setTab("in")}>
             INICIAR SESIÓN
@@ -46,7 +40,6 @@ export default function AuthForm({ initialTab }: { initialTab: Tab }) {
             CREAR CUENTA
           </button>
         </div>
-
         <form onSubmit={submit}>
           <div className="field">
             <label htmlFor="auth-user">Usuario</label>
@@ -79,24 +72,13 @@ export default function AuthForm({ initialTab }: { initialTab: Tab }) {
               placeholder="••••••••"
             />
           </div>
-
-          <button
-            className="btn lg"
-            type="submit"
-            style={{ width: "100%", marginTop: 8 }}
-          >
+          <button className="btn lg" type="submit" style={{ width: "100%", marginTop: 8 }}>
             {tab === "in" ? "ENTRAR AL VAULT" : "CREAR Y JUGAR"}
           </button>
         </form>
-
-        <Link
-          href="/games"
-          className="btn ghost"
-          style={{ width: "100%", marginTop: 10 }}
-        >
+        <Link href="/games" className="btn ghost" style={{ width: "100%", marginTop: 10 }}>
           JUGAR COMO INVITADO
         </Link>
-
         <div className="auth-divider">O CONTINÚA CON</div>
         <div className="social">
           {/* Decorativos: esta spec no implementa OAuth. */}
@@ -107,7 +89,6 @@ export default function AuthForm({ initialTab }: { initialTab: Tab }) {
             ▣ GITHUB
           </button>
         </div>
-
         <div
           style={{
             marginTop: 18,

@@ -1,13 +1,8 @@
 "use client";
-
 import { useActionState, useEffect, useRef, useState } from "react";
-
 import { sendContactMessage, type ContactState } from "@/app/actions/contact";
-
 const INICIAL: ContactState = { status: "idle" };
-
 const CAMPOS = ["name", "email", "message"] as const;
-
 /**
  * Formulario de contacto de `/about`. Es el único componente de cliente de esta
  * pantalla: el hero, la misión y los datos se quedan en el servidor.
@@ -18,17 +13,13 @@ const CAMPOS = ["name", "email", "message"] as const;
  * controlada solo funciona en el primer caso.
  */
 export default function ContactForm() {
-  const [state, formAction, pending] = useActionState(
-    sendContactMessage,
-    INICIAL,
-  );
+  const [state, formAction, pending] = useActionState(sendContactMessage, INICIAL);
   const [shake, setShake] = useState(false);
   // Tras `sent` o `failed`, la terminal sustituye al formulario. Estos botones
   // lo devuelven sin que el estado del servidor tenga que cambiar.
   const [reabierto, setReabierto] = useState(false);
   const temporizador = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [estadoVisto, setEstadoVisto] = useState(state);
-
   // El reabierto se cancela cuando llega un estado NUEVO del servidor, no al
   // pulsar enviar. Si se cancelase al enviar, durante el `pending` —que conserva
   // el estado anterior— reaparecería la terminal vieja y `▶ ENVIANDO…` no se
@@ -42,21 +33,18 @@ export default function ContactForm() {
     setEstadoVisto(state);
     setReabierto(false);
   }
-
   useEffect(
     () => () => {
       if (temporizador.current) clearTimeout(temporizador.current);
     },
-    [],
+    []
   );
-
   // Guarda de campos vacíos. Se queda en el cliente: ir al servidor para sacudir
   // un formulario vacío añade cientos de ms a un aviso que debe ser instantáneo.
   // `preventDefault` cancela también la Server Action, no solo el envío nativo.
   const alEnviar = (e: React.FormEvent<HTMLFormElement>) => {
     const datos = new FormData(e.currentTarget);
     const hayVacios = CAMPOS.some((k) => !String(datos.get(k) ?? "").trim());
-
     if (hayVacios) {
       e.preventDefault();
       setShake(true);
@@ -64,17 +52,11 @@ export default function ContactForm() {
       temporizador.current = setTimeout(() => setShake(false), 400);
     }
   };
-
-  const enTerminal =
-    !reabierto && (state.status === "sent" || state.status === "failed");
-
+  const enTerminal = !reabierto && (state.status === "sent" || state.status === "failed");
   // Repuebla los campos cuando el navegador recargó sin JavaScript, y tras
   // REINTENTAR, que sí los desmonta.
   const valores =
-    state.status === "invalid" || state.status === "failed"
-      ? state.values
-      : undefined;
-
+    state.status === "invalid" || state.status === "failed" ? state.values : undefined;
   return (
     <form
       className={shake ? "contact-form shake" : "contact-form"}
@@ -96,22 +78,17 @@ export default function ContactForm() {
             </div>
             <div className="term-body">
               <div className="line">
-                <span className="prompt">vault@arcade:~$</span> ./send_message
-                --to=team
+                <span className="prompt">vault@arcade:~$</span> ./send_message --to=team
               </div>
               <div className="line dim">[OK] Conectando con servidor…</div>
               <div className="line dim">[OK] Validando contenido…</div>
               <div className="line dim">[OK] Transmitiendo paquete…</div>
               <div className="line success">
-                &gt; MENSAJE RECIBIDO. TE RESPONDEREMOS PRONTO. GRACIAS,{" "}
-                {state.name.toUpperCase()}.<span className="caret">_</span>
+                &gt; MENSAJE RECIBIDO. TE RESPONDEREMOS PRONTO. GRACIAS, {state.name.toUpperCase()}.
+                <span className="caret">_</span>
               </div>
               <div style={{ marginTop: 18 }}>
-                <button
-                  className="btn ghost"
-                  type="button"
-                  onClick={() => setReabierto(true)}
-                >
+                <button className="btn ghost" type="button" onClick={() => setReabierto(true)}>
                   ENVIAR OTRO MENSAJE
                 </button>
               </div>
@@ -127,25 +104,18 @@ export default function ContactForm() {
             </div>
             <div className="term-body">
               <div className="line">
-                <span className="prompt">vault@arcade:~$</span> ./send_message
-                --to=team
+                <span className="prompt">vault@arcade:~$</span> ./send_message --to=team
               </div>
               {/* Esta línea sí es cierta: el mensaje pasó la validación antes
                   de intentar enviarse. No se inventan más pasos correctos. */}
               <div className="line dim">[OK] Validando contenido…</div>
-              <div className="line fail">
-                [FAIL] No se pudo entregar el mensaje.
-              </div>
+              <div className="line fail">[FAIL] No se pudo entregar el mensaje.</div>
               <div className="line success fail">
                 &gt; EL MENSAJE NO SALIÓ. VUELVE A INTENTARLO EN UN MOMENTO.
                 <span className="caret">_</span>
               </div>
               <div style={{ marginTop: 18 }}>
-                <button
-                  className="btn ghost"
-                  type="button"
-                  onClick={() => setReabierto(true)}
-                >
+                <button className="btn ghost" type="button" onClick={() => setReabierto(true)}>
                   REINTENTAR
                 </button>
               </div>
@@ -183,7 +153,6 @@ export default function ContactForm() {
               placeholder="Cuéntanos qué tienes en mente…"
             />
           </div>
-
           {/* Honeypot. Ningún humano lo ve ni lo alcanza con el tabulador; si
               llega relleno, el servidor responde éxito sin enviar nada. Va
               fuera de pantalla en vez de con `display: none`, que algunos bots
@@ -207,7 +176,6 @@ export default function ContactForm() {
               autoComplete="off"
             />
           </div>
-
           {state.status === "invalid" && (
             <p
               className="mono"
@@ -222,7 +190,6 @@ export default function ContactForm() {
               {state.message}
             </p>
           )}
-
           <button
             className="btn xl press"
             type="submit"

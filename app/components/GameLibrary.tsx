@@ -1,24 +1,18 @@
 "use client";
-
 import { useMemo, useState } from "react";
 import GameCard from "@/app/components/GameCard";
 import { CATEGORY_FILTERS, GAMES } from "@/app/lib/games";
 import type { CategoryFilter } from "@/app/lib/types";
-
 export default function GameLibrary() {
   const [q, setQ] = useState("");
   const [cat, setCat] = useState<CategoryFilter>("TODOS");
-
   const filtered = useMemo(
     () =>
       GAMES.filter(
-        (g) =>
-          (cat === "TODOS" || g.cat === cat) &&
-          g.title.toLowerCase().includes(q.toLowerCase()),
+        (g) => (cat === "TODOS" || g.cat === cat) && g.title.toLowerCase().includes(q.toLowerCase())
       ),
-    [q, cat],
+    [q, cat]
   );
-
   return (
     <div className="fade-in">
       <section className="av-hero">
@@ -27,7 +21,6 @@ export default function GameLibrary() {
           INSERTA UNA MONEDA PARA JUGAR <span className="blink">_</span>
         </div>
       </section>
-
       <div className="av-filters">
         <div className="av-search">
           <span className="ico">⌕</span>
@@ -50,7 +43,6 @@ export default function GameLibrary() {
           ))}
         </div>
       </div>
-
       <div className="av-grid">
         {filtered.map((g) => (
           <GameCard key={g.id} game={g} />
