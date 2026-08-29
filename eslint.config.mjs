@@ -22,6 +22,11 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Tipos generados por `npm run db:types` desde el esquema remoto. No es
+    // código escrito a mano: la regla de cero líneas en blanco de este repo no
+    // le aplica, y cualquier `--fix` sobre él se perdería en la siguiente
+    // regeneración.
+    "app/lib/supabase/database.types.ts",
     // Plantillas de referencia: scripts UMD que toman React y sus componentes
     // de `window`, no módulos de la aplicación. No se importan desde `app/`.
     "references/**",

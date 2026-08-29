@@ -8,3 +8,4 @@ next-env.d.ts
 references
 .playwright-mcp
 .playwright-screenshots
+supabase/.temp
