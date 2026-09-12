@@ -8,9 +8,14 @@
     "start": "next start",
     "lint": "eslint",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "db:types": "printf '%s\\n%s\\n' '// Tipos del esquema de la base de datos, generados desde el proyecto enlazado.' '// No editar a mano: se regenera con  npm run db:types' > app/lib/supabase/database.types.ts && supabase gen types --linked --lang typescript --schema public >> app/lib/supabase/database.types.ts && prettier --write app/lib/supabase/database.types.ts",
+    "db:push": "supabase db push --linked",
+    "db:migration": "supabase migration new"
   },
   "dependencies": {
+    "@supabase/ssr": "0.12.5",
+    "@supabase/supabase-js": "2.112.4",
     "next": "16.2.12",
     "react": "19.2.4",
     "react-dom": "19.2.4",
@@ -24,6 +29,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.2.12",
     "prettier": "^3.9.6",
+    "supabase": "2.116.0",
     "tailwindcss": "^4",
     "typescript": "^5"
   }
