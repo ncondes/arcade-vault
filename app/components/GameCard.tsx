@@ -3,13 +3,15 @@ import Link from "next/link";
 import { useRef } from "react";
 import { isPlayable } from "@/app/lib/arcade/registry";
 import type { Game } from "@/app/lib/types";
+import { formatScore } from "@/app/lib/format";
 /** `.btn` solo define variantes para magenta y amarillo; el resto usa el cian por defecto. */
 function accentClass(color: Game["color"]) {
   if (color === "magenta") return "btn magenta";
   if (color === "yellow") return "btn yellow";
   return "btn";
 }
-export default function GameCard({ game }: { game: Game }) {
+/** `best`: récord real del juego, o `null` si no tiene puntuaciones ("—"). */
+export default function GameCard({ game, best }: { game: Game; best: number | null }) {
   const tiltRef = useRef<HTMLAnchorElement>(null);
   const onMove = (e: React.MouseEvent<HTMLAnchorElement>) => {
     const el = tiltRef.current;
@@ -46,7 +48,7 @@ export default function GameCard({ game }: { game: Game }) {
         <div className="row">
           <div className="score-badge">
             <span>MEJOR PUNTUACIÓN</span>
-            <b>{game.best.toLocaleString("es-ES")}</b>
+            <b>{best === null ? "—" : formatScore(best)}</b>
           </div>
           {/* Adorno: el destino es la tarjeta entera, así que no puede ser un
               <button> anidado dentro del <a>. */}

@@ -11,7 +11,7 @@ import { SUPABASE_PUBLISHABLE_KEY, SUPABASE_URL } from "@/app/lib/supabase/confi
  * y compartir el cliente entre peticiones mezcla la sesión de un usuario con la
  * de otro.
  *
- * Para el navegador va el otro fichero: `@/app/lib/supabase/client`.
+ * Para el navegador va el otro fichero, `client.ts`, en esta misma carpeta.
  */
 export async function createClient() {
   const cookieStore = await cookies();

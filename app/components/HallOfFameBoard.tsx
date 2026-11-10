@@ -1,8 +1,9 @@
 "use client";
 import Link from "next/link";
-import { useMemo, useState } from "react";
-import { GAMES } from "@/app/lib/games";
-import { gameSeed, seededScores } from "@/app/lib/scores";
+import { type ReactNode, useState } from "react";
+import RankingNotice from "@/app/components/RankingNotice";
+import type { ScoreRow } from "@/app/lib/types";
+import { formatScore } from "@/app/lib/format";
 /** Las tres primeras filas de la tabla llevan clase propia en globals.css. */
 function podiumClass(index: number) {
   if (index === 0) return " top1";
@@ -10,9 +11,57 @@ function podiumClass(index: number) {
   if (index === 2) return " top3";
   return "";
 }
-export default function HallOfFameBoard() {
-  const [tab, setTab] = useState(GAMES[0].id);
-  const rows = useMemo(() => seededScores(gameSeed(tab) * 23 + 7, 12), [tab]);
+/** Una plaza del podio. Solo se pinta si existe la fila: el podio tolera 0, 1 o 2. */
+function PodiumSlot({ row, place }: { row: ScoreRow; place: 1 | 2 | 3 }) {
+  if (place === 1) {
+    return (
+      <div className="podium-slot gold">
+        <div
+          className="pixel"
+          style={{
+            fontSize: 9,
+            color: "var(--gold)",
+            letterSpacing: "0.18em",
+          }}
+        >
+          CAMPEÓN
+        </div>
+        <div className="rank-num" style={{ fontSize: 36, marginTop: 4 }}>
+          01
+        </div>
+        <div className="name">{row.name}</div>
+        <div className="score" style={{ fontSize: 20 }}>
+          {formatScore(row.score)}
+        </div>
+        <div className="date">{row.date}</div>
+      </div>
+    );
+  }
+  return (
+    <div className={"podium-slot " + (place === 2 ? "silver" : "bronze")}>
+      <div className="rank-num">0{place}</div>
+      <div className="name">{row.name}</div>
+      <div className="score">{formatScore(row.score)}</div>
+      <div className="date">{row.date}</div>
+    </div>
+  );
+}
+/**
+ * `tabs`: el catálogo en orden. `rows`: gameId -> top 12 real (una fila por nombre);
+ * `null` = "RANKING NO DISPONIBLE", `[]` = "SIN PUNTUACIONES TODAVÍA".
+ * `children`: la matriz POR JUGADOR, que no depende de la pestaña activa.
+ */
+export default function HallOfFameBoard({
+  tabs,
+  rows: rowsByGame,
+  children,
+}: {
+  tabs: { id: string; title: string }[];
+  rows: Record<string, ScoreRow[] | null>;
+  children?: ReactNode;
+}) {
+  const [tab, setTab] = useState(tabs[0]?.id ?? "");
+  const rows = rowsByGame[tab] ?? null;
   return (
     <div className="av-hall fade-in">
       <div className="hall-head">
@@ -22,7 +71,7 @@ export default function HallOfFameBoard() {
         </p>
       </div>
       <div className="hall-tabs">
-        {GAMES.map((g) => (
+        {tabs.map((g) => (
           <button
             key={g.id}
             className={"chip" + (tab === g.id ? " active" : "")}
@@ -32,60 +81,37 @@ export default function HallOfFameBoard() {
           </button>
         ))}
       </div>
-      <div className="podium">
-        <div className="podium-slot silver">
-          <div className="rank-num">02</div>
-          <div className="name">{rows[1].name}</div>
-          <div className="score">{rows[1].score.toLocaleString("es-ES")}</div>
-          <div className="date">{rows[1].date}</div>
+      {rows && rows.length > 0 && (
+        <div className="podium">
+          {rows[1] && <PodiumSlot row={rows[1]} place={2} />}
+          <PodiumSlot row={rows[0]} place={1} />
+          {rows[2] && <PodiumSlot row={rows[2]} place={3} />}
         </div>
-        <div className="podium-slot gold">
-          <div
-            className="pixel"
-            style={{
-              fontSize: 9,
-              color: "var(--gold)",
-              letterSpacing: "0.18em",
-            }}
-          >
-            CAMPEÓN
-          </div>
-          <div className="rank-num" style={{ fontSize: 36, marginTop: 4 }}>
-            01
-          </div>
-          <div className="name">{rows[0].name}</div>
-          <div className="score" style={{ fontSize: 20 }}>
-            {rows[0].score.toLocaleString("es-ES")}
-          </div>
-          <div className="date">{rows[0].date}</div>
-        </div>
-        <div className="podium-slot bronze">
-          <div className="rank-num">03</div>
-          <div className="name">{rows[2].name}</div>
-          <div className="score">{rows[2].score.toLocaleString("es-ES")}</div>
-          <div className="date">{rows[2].date}</div>
-        </div>
-      </div>
+      )}
       <div className="hall-table">
-        <div className="th">
-          <div>RANGO</div>
-          <div>JUGADOR</div>
-          <div>PUNTUACIÓN</div>
-          <div>FECHA</div>
-        </div>
-        {rows.map((r, i) => (
+        <RankingNotice rows={rows} />
+        {rows && rows.length > 0 && (
+          <div className="th">
+            <div>RANGO</div>
+            <div>JUGADOR</div>
+            <div>PUNTUACIÓN</div>
+            <div>FECHA</div>
+          </div>
+        )}
+        {rows?.map((r, i) => (
           <div
-            key={r.name + i}
+            key={r.name}
             className={"tr" + podiumClass(i)}
             style={{ animationDelay: `${i * 50}ms` }}
           >
             <div className="rk">#{String(r.rank).padStart(2, "0")}</div>
             <div className="pl">{r.name}</div>
-            <div className="sc">{r.score.toLocaleString("es-ES")}</div>
+            <div className="sc">{formatScore(r.score)}</div>
             <div className="dt">{r.date}</div>
           </div>
         ))}
       </div>
+      {children}
       <div style={{ textAlign: "center", marginTop: 32 }}>
         <Link className="btn lg" href="/games">
           VOLVER A LA BIBLIOTECA
