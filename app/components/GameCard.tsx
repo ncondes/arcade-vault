@@ -1,6 +1,7 @@
 "use client";
 import Link from "next/link";
 import { useRef } from "react";
+import { isPlayable } from "@/app/lib/arcade/registry";
 import type { Game } from "@/app/lib/types";
 /** `.btn` solo define variantes para magenta y amarillo; el resto usa el cian por defecto. */
 function accentClass(color: Game["color"]) {
@@ -37,6 +38,7 @@ export default function GameCard({ game }: { game: Game }) {
       <div className="cover">
         <div className={"cover-bg " + game.cover} />
         <div className="label">{game.cat}</div>
+        {isPlayable(game.id) && <div className="playable-badge">JUGABLE</div>}
       </div>
       <div className="meta">
         <div className="title">{game.title}</div>

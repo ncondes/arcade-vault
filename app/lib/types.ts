@@ -5,6 +5,7 @@ export type CategoryFilter = "TODOS" | Category;
 export type Accent = "cyan" | "magenta" | "yellow" | "green";
 /** Clases de portada ya definidas en `app/globals.css`. */
 export type CoverClass =
+  | "cover-asteroides"
   | "cover-bricks"
   | "cover-tetro"
   | "cover-snake"
