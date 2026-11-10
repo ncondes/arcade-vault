@@ -3,9 +3,13 @@ import Link from "next/link";
 import FeatureIcon from "@/app/components/FeatureIcon";
 import FloatingSilhouettes from "@/app/components/FloatingSilhouettes";
 import MiniCard from "@/app/components/MiniCard";
+import RankingNotice from "@/app/components/RankingNotice";
 import Reveal from "@/app/components/Reveal";
-import { GAMES, getGame } from "@/app/lib/games";
-import { FAQ, FEATURES, HOME_STATS, RECENT_SCORES, TOP_PLAYERS } from "@/app/lib/home";
+import { getGames } from "@/app/lib/data/games";
+import { getRecentScores, getTopPlayers } from "@/app/lib/data/scores";
+import { formatScore } from "@/app/lib/format";
+import { FAQ, FEATURES, HOME_STATS } from "@/app/lib/home";
+import type { HomeStat } from "@/app/lib/types";
 export const metadata: Metadata = {
   // El `title.template` de `app/layout.tsx` no alcanza a la `page.tsx` de su
   // mismo segmento de ruta, así que aquí el título va compuesto a mano.
@@ -13,7 +17,24 @@ export const metadata: Metadata = {
 };
 /** Distintivo de las tres primeras filas del top; el resto va sin clase. */
 const TOP_RANK_CLASSES = [" top1", " top2", " top3"];
-export default function Home() {
+const FEATURED = 6;
+const RECENT_LIMIT = 7;
+const TOP_LIMIT = 5;
+// Se renderiza en cada petición (spec 06). El catálogo lanza si falla (error.tsx);
+// las dos listas de actividad devuelven `null` y solo degradan su tarjeta.
+export default async function Home() {
+  const [games, recent, top] = await Promise.all([
+    getGames(),
+    getRecentScores(RECENT_LIMIT),
+    getTopPlayers(TOP_LIMIT),
+  ]);
+  const titles = new Map(games.map((g) => [g.id, g.title]));
+  const stats: HomeStat[] = [
+    { value: `${games.length}+`, unit: "JUEGOS", note: "Y CONTANDO" },
+    ...HOME_STATS,
+  ];
+  // La barra del top es proporcional a la marca del #01.
+  const topBest = top?.[0]?.score ?? 0;
   return (
     <div className="home fade-in">
       {/* Sin JavaScript el observador de `Reveal` no llega a correr y todo lo
@@ -79,7 +100,7 @@ export default function Home() {
           <div className="section-rule" />
         </div>
         <div className="mini-rail">
-          {GAMES.slice(0, 6).map((g) => (
+          {games.slice(0, FEATURED).map((g) => (
             <MiniCard key={g.id} game={g} />
           ))}
         </div>
@@ -92,7 +113,7 @@ export default function Home() {
       {/* STATS */}
       <Reveal className="home-stats">
         <div className="stats-inner">
-          {HOME_STATS.map((st) => (
+          {stats.map((st) => (
             <div key={st.unit} className="stat-block">
               <div className="stat-n neon-yellow">{st.value}</div>
               <div className="stat-u pixel">{st.unit}</div>
@@ -114,13 +135,18 @@ export default function Home() {
               <div className="ac-title pixel">▸ ÚLTIMAS PUNTUACIONES</div>
             </div>
             <div className="ticker">
-              {RECENT_SCORES.map((r, i) => (
-                <div key={r.gameId} className="tick-row" style={{ animationDelay: `${i * 60}ms` }}>
+              <RankingNotice rows={recent} />
+              {recent?.map((r, i) => (
+                <div
+                  key={`${i}-${r.player}-${r.gameId}`}
+                  className="tick-row"
+                  style={{ animationDelay: `${i * 60}ms` }}
+                >
                   <span className={"tk-p neon-" + r.accent}>{r.player}</span>
-                  {/* El título sale de GAMES: si mañana se renombra un juego,
+                  {/* El título sale del catálogo: si mañana se renombra un juego,
                       el ticker se entera. */}
-                  <span className="tk-mid">▸ {getGame(r.gameId)!.title}</span>
-                  <span className="tk-s">+{r.score.toLocaleString("es-ES")}</span>
+                  <span className="tk-mid">▸ {titles.get(r.gameId) ?? r.gameId}</span>
+                  <span className="tk-s">+{formatScore(r.score)}</span>
                   <span className="tk-t">{r.ago}</span>
                 </div>
               ))}
@@ -128,20 +154,24 @@ export default function Home() {
           </div>
           <div className="activity-card">
             <div className="ac-head">
-              <div className="ac-title pixel neon-magenta">▸ TOP JUGADORES · HOY</div>
+              <div className="ac-title pixel neon-magenta">▸ TOP JUGADORES</div>
               <Link className="lb-link" href="/hall-of-fame">
                 VER SALÓN →
               </Link>
             </div>
             <div className="top-list">
-              {TOP_PLAYERS.map((p, i) => (
+              <RankingNotice rows={top} />
+              {top?.map((p, i) => (
                 <div key={p.player} className={"top-row" + (TOP_RANK_CLASSES[i] ?? "")}>
                   <span className="tp-rk">#{String(i + 1).padStart(2, "0")}</span>
                   <span className="tp-bar">
-                    <span className="tp-fill" style={{ width: `${100 - i * 16}%` }} />
+                    <span
+                      className="tp-fill"
+                      style={{ width: `${topBest > 0 ? (p.score / topBest) * 100 : 0}%` }}
+                    />
                   </span>
                   <span className="tp-p">{p.player}</span>
-                  <span className="tp-s">{p.score.toLocaleString("es-ES")}</span>
+                  <span className="tp-s">{formatScore(p.score)}</span>
                 </div>
               ))}
             </div>

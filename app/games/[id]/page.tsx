@@ -3,24 +3,32 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import Leaderboard from "@/app/components/Leaderboard";
 import { isPlayable } from "@/app/lib/arcade/registry";
-import { GAMES, getGame } from "@/app/lib/games";
-import { gameSeed, seededScores } from "@/app/lib/scores";
+import { getGame } from "@/app/lib/data/games";
+import { getGameStats, getLeaderboard } from "@/app/lib/data/scores";
+import { formatScore } from "@/app/lib/format";
 type Props = { params: Promise<{ id: string }> };
-// Los 8 juegos son datos estáticos: se prerenderizan en build.
-// Un id desconocido sigue resolviéndose bajo demanda y cae en notFound().
-export function generateStaticParams() {
-  return GAMES.map((g) => ({ id: g.id }));
-}
+// Se renderiza en cada petición (spec 06): una puntuación recién guardada tiene
+// que verse al recargar, sin rebuild ni caché. Un id desconocido cae en notFound().
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
-  const game = getGame(id);
+  const game = await getGame(id);
   return { title: game?.title ?? "Juego no encontrado" };
 }
 export default async function GameDetailPage({ params }: Props) {
   const { id } = await params;
-  const game = getGame(id);
+  // `getGame` lanza si falla el catálogo (lo recoge error.tsx); las puntuaciones
+  // devuelven `null` y solo degradan su bloque.
+  const [game, rows, stats] = await Promise.all([
+    getGame(id),
+    getLeaderboard(id, 10),
+    getGameStats(),
+  ]);
   if (!game) notFound();
-  const scores = seededScores(gameSeed(game.id) * 17 + 3, 10);
+  // Sin lectura de estadísticas no se sabe ni el récord ni el conteo: "—".
+  // Con lectura pero sin filas del juego, el récord es "—" y el conteo es 0.
+  const gameStats = stats?.get(game.id);
+  const best = gameStats ? formatScore(gameStats.best) : "—";
+  const count = stats ? formatScore(gameStats?.count ?? 0) : "—";
   return (
     <div className="av-detail fade-in">
       <div>
@@ -39,8 +47,8 @@ export default async function GameDetailPage({ params }: Props) {
           <p>{game.long}</p>
           <div className="stat-strip">
             <div>
-              <div className="l">Partidas</div>
-              <div className="v">{game.plays}</div>
+              <div className="l">Puntuaciones</div>
+              <div className="v">{count}</div>
             </div>
             <div>
               <div className="l">Mejor global</div>
@@ -51,7 +59,7 @@ export default async function GameDetailPage({ params }: Props) {
                   textShadow: "0 0 6px rgba(255,0,110,0.5)",
                 }}
               >
-                {game.best.toLocaleString("es-ES")}
+                {best}
               </div>
             </div>
             <div>
@@ -78,7 +86,7 @@ export default async function GameDetailPage({ params }: Props) {
         </div>
       </div>
       <aside>
-        <Leaderboard rows={scores} />
+        <Leaderboard rows={rows} />
       </aside>
     </div>
   );

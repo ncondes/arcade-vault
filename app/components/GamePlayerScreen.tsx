@@ -1,16 +1,24 @@
 "use client";
 import Link from "next/link";
 import { useRef, useState } from "react";
+import { saveScore } from "@/app/actions/scores";
 import GameCanvas, { type GameCanvasHandle } from "@/app/components/GameCanvas";
 import { isPlayable } from "@/app/lib/arcade/registry";
 import type { ArcadeSnapshot } from "@/app/lib/arcade/types";
 import type { Game } from "@/app/lib/types";
+import { formatScore } from "@/app/lib/format";
 // Dos ramas según el registro. Juego registrado: el HUD lee la instantánea del
 // motor y los botones le dan órdenes. Juego sin registrar: la maqueta de la
 // spec 01, sin cambios — el HUD no simula nada.
 const LIVES = 3;
 const LEVEL = 3;
 const DEFAULT_PLAYER = "INVITADO";
+/** Guardado real (solo rama jugable): listo → enviando → guardado, o error con reintento. */
+type SaveState =
+  | { status: "ready" }
+  | { status: "sending" }
+  | { status: "saved" }
+  | { status: "error"; message: string };
 export default function GamePlayerScreen({ game }: { game: Game }) {
   const playable = isPlayable(game.id);
   const engine = useRef<GameCanvasHandle>(null);
@@ -18,8 +26,14 @@ export default function GamePlayerScreen({ game }: { game: Game }) {
   const [mockPaused, setMockPaused] = useState(false);
   const [mockOver, setMockOver] = useState(false);
   const [name, setName] = useState(DEFAULT_PLAYER);
+  // `saved` es el de la maqueta, que no persiste nada; `save`, el de la rama jugable.
   const [saved, setSaved] = useState(false);
-  const score = playable ? (snapshot?.score ?? 0) : game.best;
+  const [save, setSave] = useState<SaveState>({ status: "ready" });
+  // El estado de React no se actualiza a tiempo para un doble clic: el ref
+  // corta el segundo envío antes de que el botón llegue a desactivarse.
+  const sending = useRef(false);
+  // En la maqueta no hay partida: el HUD marca 0 en vez de un récord que no es suyo.
+  const score = playable ? (snapshot?.score ?? 0) : 0;
   const lives = playable ? (snapshot?.lives ?? LIVES) : LIVES;
   const level = playable ? (snapshot?.level ?? 1) : LEVEL;
   const paused = playable ? snapshot?.status === "paused" : mockPaused;
@@ -40,8 +54,25 @@ export default function GamePlayerScreen({ game }: { game: Game }) {
     setMockPaused(false);
     setMockOver(false);
     setSaved(false);
+    setSave({ status: "ready" });
     setName(DEFAULT_PLAYER);
   };
+  const submitScore = async () => {
+    if (sending.current) return;
+    sending.current = true;
+    setSave({ status: "sending" });
+    try {
+      const result = await saveScore({ gameId: game.id, name, score });
+      setSave(result.ok ? { status: "saved" } : { status: "error", message: result.error });
+    } catch {
+      // La llamada no llegó al servidor (red cortada, servidor caído). La
+      // puntuación sigue en pantalla para el reintento.
+      setSave({ status: "error", message: "SIN CONEXIÓN. INTÉNTALO DE NUEVO" });
+    } finally {
+      sending.current = false;
+    }
+  };
+  const isSaved = playable ? save.status === "saved" : saved;
   return (
     <div className="av-player fade-in" data-game-screen>
       <div className="player-hud">
@@ -54,7 +85,7 @@ export default function GamePlayerScreen({ game }: { game: Game }) {
           </div>
           <div className="hud-stat">
             <div className="l">Puntuación</div>
-            <div className="v">{score.toLocaleString("es-ES")}</div>
+            <div className="v">{formatScore(score)}</div>
           </div>
           <div className="hud-stat lives">
             <div className="l">Vidas</div>
@@ -124,20 +155,42 @@ export default function GamePlayerScreen({ game }: { game: Game }) {
           <div className="modal">
             <h2>FIN DEL JUEGO</h2>
             <div className="final-label">PUNTUACIÓN FINAL</div>
-            <div className="final">{score.toLocaleString("es-ES")}</div>
-            {!saved ? (
-              <div className="input-row">
-                <input
-                  value={name}
-                  onChange={(e) => setName(e.target.value.toUpperCase().slice(0, 10))}
-                  placeholder="TUS INICIALES"
-                  aria-label="Tus iniciales"
-                />
-                {/* Solo cambia el texto: esta spec no persiste puntuaciones. */}
-                <button className="btn yellow" onClick={() => setSaved(true)}>
-                  GUARDAR PUNTUACIÓN
-                </button>
-              </div>
+            <div className="final">{formatScore(score)}</div>
+            {!isSaved ? (
+              <>
+                <div className="input-row">
+                  <input
+                    value={name}
+                    onChange={(e) => setName(e.target.value.toUpperCase().slice(0, 10))}
+                    placeholder="TUS INICIALES"
+                    aria-label="Tus iniciales"
+                    disabled={save.status === "sending"}
+                  />
+                  {playable ? (
+                    <button
+                      className="btn yellow"
+                      onClick={submitScore}
+                      disabled={save.status === "sending"}
+                    >
+                      {save.status === "sending"
+                        ? "GUARDANDO…"
+                        : save.status === "error"
+                          ? "REINTENTAR"
+                          : "GUARDAR PUNTUACIÓN"}
+                    </button>
+                  ) : (
+                    // Maqueta: no hay partida real, así que no se guarda nada.
+                    <button className="btn yellow" onClick={() => setSaved(true)}>
+                      GUARDAR PUNTUACIÓN
+                    </button>
+                  )}
+                </div>
+                {playable && save.status === "error" && (
+                  <div className="save-error" role="alert">
+                    ▸ {save.message}
+                  </div>
+                )}
+              </>
             ) : (
               <div className="toast-saved">▸ PUNTUACIÓN GUARDADA_</div>
             )}

@@ -1096,6 +1096,20 @@
     color: var(--bronze);
     text-shadow: 0 0 6px rgba(217, 122, 58, 0.5);
   }
+  /* Estados sin filas de cualquier bloque de ranking (RankingNotice). */
+  .rank-notice {
+    padding: 28px 16px;
+    text-align: center;
+    font-family: var(--pixel);
+    font-size: 10px;
+    line-height: 1.8;
+    letter-spacing: 0.14em;
+    color: var(--ink-faint);
+  }
+  .rank-notice.off {
+    color: var(--magenta);
+    text-shadow: 0 0 6px rgba(255, 0, 110, 0.4);
+  }
 
   /* ===== player ===== */
   .av-player {
@@ -1546,6 +1560,19 @@
     border-color: var(--cyan);
     box-shadow: 0 0 10px rgba(0, 245, 255, 0.35);
   }
+  /* El botón desactivado ya lo cubre `.btn:disabled`; aquí solo el input mientras se envía. */
+  .modal .input-row input:disabled {
+    opacity: 0.55;
+  }
+  /* Error al guardar la puntuación: se queda en el modal, con REINTENTAR. */
+  .save-error {
+    margin: -4px 0 4px;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    color: var(--magenta);
+    text-shadow: 0 0 6px rgba(255, 0, 110, 0.4);
+  }
   .modal .actions {
     display: flex;
     gap: 10px;
@@ -1747,6 +1774,19 @@
       grid-template-columns: 1fr;
     }
   }
+  /* Cada plaza en su columna fija: si falta la plata o el bronce (0-2 filas),
+     el oro sigue en el centro en vez de correrse a la izquierda. */
+  @media (min-width: 721px) {
+    .podium-slot.silver {
+      grid-column: 1;
+    }
+    .podium-slot.gold {
+      grid-column: 2;
+    }
+    .podium-slot.bronze {
+      grid-column: 3;
+    }
+  }
   .podium-slot {
     position: relative;
     border: 1px solid var(--line);
@@ -1860,6 +1900,246 @@
   .hall-table .tr.top3 .sc {
     color: var(--bronze);
   }
+  /* ===== salón · matriz POR JUGADOR (PlayerMatrix) =====
+     Dos vistas del mismo dato: tabla en ≥ 768px, tarjetas por debajo. Cada juego
+     lleva su color de catálogo en `--acc`; la celda que da al jugador su MEJOR se
+     ilumina con él. En móvil, la línea de puntos cuadrados de las tablas de
+     récords de las recreativas. */
+  .pm {
+    margin-top: 56px;
+  }
+  .pm .section-head {
+    margin-bottom: 10px;
+  }
+  .pm-sub {
+    margin: 0 0 20px;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    color: var(--ink-dim);
+  }
+  .pm .cyan {
+    --acc: var(--cyan);
+    --acc-glow: rgba(0, 245, 255, 0.45);
+  }
+  .pm .magenta {
+    --acc: var(--magenta);
+    --acc-glow: rgba(255, 0, 110, 0.45);
+  }
+  .pm .yellow {
+    --acc: var(--yellow);
+    --acc-glow: rgba(245, 255, 0, 0.4);
+  }
+  .pm .green {
+    --acc: var(--green);
+    --acc-glow: rgba(0, 255, 136, 0.4);
+  }
+  .pm-frame {
+    border: 1px solid var(--line);
+    background: var(--bg-2);
+  }
+  /* --- tabla (≥ 768px) --- */
+  .pm-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: var(--mono);
+    font-size: 13px;
+  }
+  .pm-table th,
+  .pm-table td {
+    padding: 12px 14px;
+    text-align: right;
+    font-weight: 400;
+    border-bottom: 1px solid var(--line-2);
+  }
+  .pm-table tbody tr:last-child > * {
+    border-bottom: 0;
+  }
+  .pm-table thead th {
+    font-family: var(--pixel);
+    font-size: 9px;
+    line-height: 1.6;
+    letter-spacing: 0.14em;
+    color: var(--ink-faint);
+    vertical-align: bottom;
+    border-bottom: 1px solid var(--line);
+  }
+  .pm-table .pm-rk {
+    width: 70px;
+    text-align: left;
+  }
+  .pm-table .pm-pl {
+    text-align: left;
+  }
+  /* Las columnas de juego y MEJOR se ajustan a su contenido; el nombre se queda
+     el resto. Así la celda iluminada no se estira con una sola columna. */
+  .pm-table .pm-game,
+  .pm-table .pm-cell,
+  .pm-table .pm-best {
+    width: 1%;
+    white-space: nowrap;
+    padding-left: 24px;
+  }
+  /* Títulos de dos palabras ("BLOQUE BUSTER") parten en dos líneas. */
+  .pm-table thead .pm-game {
+    white-space: normal;
+  }
+  /* Último recurso con muchos juegos en pantallas medianas: desplaza la tabla
+     dentro de su marco, nunca la página. */
+  .pm-desk {
+    overflow-x: auto;
+  }
+  @media (max-width: 1100px) {
+    .pm-table {
+      --pm-pad: 10px;
+      font-size: 12px;
+    }
+    .pm-table th,
+    .pm-table td {
+      padding: 10px 10px;
+    }
+    .pm-table .pm-game,
+    .pm-table .pm-cell,
+    .pm-table .pm-best {
+      padding-left: 14px;
+    }
+    .pm-table thead th {
+      font-size: 8px;
+      letter-spacing: 0.06em;
+    }
+    .pm-table .pm-rk {
+      width: 56px;
+    }
+  }
+  .pm-table thead .pm-game {
+    color: var(--acc);
+    text-shadow: 0 0 6px var(--acc-glow);
+    /* Barra corta del color del juego sobre el título: identifica la columna. */
+    background: linear-gradient(var(--acc), var(--acc)) right var(--pm-pad, 14px) top 0 / 24px 2px
+      no-repeat;
+  }
+  .pm-table tbody .pm-rk {
+    font-family: var(--pixel);
+    font-size: 11px;
+    color: var(--ink-dim);
+  }
+  .pm-table tbody .pm-pl {
+    color: var(--ink);
+  }
+  .pm-cell {
+    color: var(--ink-dim);
+  }
+  .pm-cell.none {
+    color: var(--ink-faint);
+  }
+  .pm-cell.lit {
+    color: var(--acc);
+    text-shadow: 0 0 8px var(--acc-glow);
+    box-shadow: inset 0 -2px 0 var(--acc);
+  }
+  .pm-table tbody .pm-best {
+    font-family: var(--pixel);
+    font-size: 12px;
+    color: var(--cyan);
+    text-shadow: 0 0 6px rgba(0, 245, 255, 0.4);
+  }
+  .pm .top1 .pm-rk,
+  .pm .top1 .pm-best {
+    color: var(--gold);
+    text-shadow: 0 0 6px rgba(255, 207, 58, 0.6);
+  }
+  .pm .top2 .pm-rk,
+  .pm .top2 .pm-best {
+    color: var(--silver);
+    text-shadow: none;
+  }
+  .pm .top3 .pm-rk,
+  .pm .top3 .pm-best {
+    color: var(--bronze);
+    text-shadow: none;
+  }
+  /* --- tarjetas (< 768px) --- */
+  .pm-cards {
+    display: none;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .pm-card {
+    border: 1px solid var(--line);
+    background: var(--bg-2);
+    padding: 14px 14px 12px;
+  }
+  .pm-card + .pm-card {
+    margin-top: 10px;
+  }
+  .pm-card-head {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    gap: 12px;
+    align-items: baseline;
+  }
+  .pm-card-head .pm-rk {
+    font-family: var(--pixel);
+    font-size: 11px;
+    color: var(--ink-dim);
+  }
+  .pm-card-head .pm-pl {
+    font-family: var(--mono);
+    font-size: 14px;
+    color: var(--ink);
+    overflow-wrap: anywhere;
+  }
+  .pm-card-head .pm-best {
+    font-family: var(--pixel);
+    font-size: 12px;
+    color: var(--cyan);
+    text-shadow: 0 0 6px rgba(0, 245, 255, 0.4);
+  }
+  .pm-lines {
+    margin: 12px 0 0;
+    padding: 10px 0 0;
+    list-style: none;
+    border-top: 1px solid var(--line-2);
+  }
+  .pm-line {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    padding: 4px 0;
+  }
+  .pm-line-title {
+    font-family: var(--pixel);
+    font-size: 9px;
+    letter-spacing: 0.12em;
+    color: var(--acc);
+    white-space: nowrap;
+  }
+  /* Puntos cuadrados de 2px, como los de las tablas de récords de recreativa. */
+  .pm-leader {
+    flex: 1;
+    min-width: 12px;
+    height: 2px;
+    background: linear-gradient(90deg, var(--ink-faint) 2px, transparent 2px) left / 6px 2px
+      repeat-x;
+  }
+  .pm-line-score {
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--ink-dim);
+  }
+  .pm-line.lit .pm-line-score {
+    color: var(--acc);
+    text-shadow: 0 0 8px var(--acc-glow);
+  }
+  @media (max-width: 767px) {
+    .pm-desk {
+      display: none;
+    }
+    .pm-cards {
+      display: block;
+    }
+  }
   .hall-table .tr.you-label {
     display: grid;
     grid-template-columns: 1fr;
@@ -1883,11 +2163,21 @@
   }
 
   @media (max-width: 720px) {
+    /* `minmax(0, 1fr)` y cabecera a 8px: con `1fr` a secas, "PUNTUACIÓN" en
+       pixel no cabía en 90px y empujaba la página a scroll horizontal a 375px. */
     .hall-table .th,
     .hall-table .tr {
-      grid-template-columns: 50px 1fr 90px 90px;
+      grid-template-columns: 40px minmax(0, 1fr) 88px 78px;
+      gap: 8px;
       font-size: 12px;
       padding: 10px 12px;
+    }
+    .hall-table .th {
+      font-size: 7px;
+      letter-spacing: 0.04em;
+    }
+    .hall-table .tr .pl {
+      overflow-wrap: anywhere;
     }
     .av-grid {
       padding: 0 16px;

@@ -6,14 +6,118 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "14.5";
+    PostgrestVersion: "14.17";
   };
   public: {
     Tables: {
-      [_ in never]: never;
+      games: {
+        Row: {
+          category: string;
+          color: string;
+          cover: string;
+          id: string;
+          long: string;
+          position: number;
+          short: string;
+          title: string;
+        };
+        Insert: {
+          category: string;
+          color: string;
+          cover: string;
+          id: string;
+          long: string;
+          position: number;
+          short: string;
+          title: string;
+        };
+        Update: {
+          category?: string;
+          color?: string;
+          cover?: string;
+          id?: string;
+          long?: string;
+          position?: number;
+          short?: string;
+          title?: string;
+        };
+        Relationships: [];
+      };
+      scores: {
+        Row: {
+          created_at: string;
+          game_id: string;
+          id: number;
+          name: string;
+          score: number;
+        };
+        Insert: {
+          created_at?: string;
+          game_id: string;
+          id?: never;
+          name: string;
+          score: number;
+        };
+        Update: {
+          created_at?: string;
+          game_id?: string;
+          id?: never;
+          name?: string;
+          score?: number;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "scores_game_id_fkey";
+            columns: ["game_id"];
+            isOneToOne: false;
+            referencedRelation: "games";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
     };
     Views: {
-      [_ in never]: never;
+      game_player_bests: {
+        Row: {
+          achieved_at: string | null;
+          game_id: string | null;
+          name: string | null;
+          score: number | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "scores_game_id_fkey";
+            columns: ["game_id"];
+            isOneToOne: false;
+            referencedRelation: "games";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      game_stats: {
+        Row: {
+          best: number | null;
+          game_id: string | null;
+          score_count: number | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "scores_game_id_fkey";
+            columns: ["game_id"];
+            isOneToOne: false;
+            referencedRelation: "games";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      player_bests: {
+        Row: {
+          achieved_at: string | null;
+          best: number | null;
+          name: string | null;
+        };
+        Relationships: [];
+      };
     };
     Functions: {
       [_ in never]: never;

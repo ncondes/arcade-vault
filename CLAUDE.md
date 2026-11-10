@@ -28,16 +28,23 @@ No test runner is configured. If tests are needed, pick and install one before w
 ## What this project is
 
 Arcade Vault — a platform for playing games online and competing for the highest score. Specs
-01–05 are implemented. The screens: landing (`/`), game library (`/games`), game detail and play screens
+01–06 are implemented. The screens: landing (`/`), game library (`/games`), game detail and play screens
 (`/games/[id]`, `/games/[id]/play`), hall of fame (`/hall-of-fame`), about + contact form wired
 to Resend (`/about`) and a **mock** login (`/login` — `AuthForm.tsx` validates nothing, creates
 no session, just navigates to `/games`).
 
-All domain data is still **static**, hardcoded in `app/lib/{games,scores,home,about}.ts`. There
-is no database behind any screen yet. **One game is real** since spec 05: `asteroides` plays on a
-canvas with a live HUD. The other eight catalog entries (including `rocas`, a separate mockup) still
-render the mockup play screen. Scores are **not saved** anywhere — the end-of-game modal, the
-leaderboards and `best` are still invented.
+Since spec 06 the **catalog and the scores live in Supabase** (tables `games` and `scores`, see
+_Supabase_ below). Every ranking, record and stat on the site — the detail leaderboard, the
+library's best score, the hall of fame (per-game podium + top 12, and the **POR JUGADOR** matrix),
+and the home's recent scores and top players — is derived from `scores`. Nothing is invented any
+more: a block with no rows says "SIN PUNTUACIONES TODAVÍA". Every screen renders **on each
+request** (no `generateStaticParams`, no ISR), so a saved score shows on reload.
+
+What is still static: the marketing copy in `app/lib/home.ts` (`FEATURES`, `HOME_STATS` except the
+game count, `FAQ`), `app/lib/about.ts`, and `CATEGORY_FILTERS` in `app/lib/games.ts` (UI, not
+data). **One game is real** since spec 05: `asteroides` plays on a canvas with a live HUD and its
+end-of-game modal saves the score. The other eight catalog entries (including `rocas`, a separate
+mockup) still render the mockup play screen, whose HUD shows `0` and whose modal saves nothing.
 
 Features go through a **spec-driven workflow**: `/spec` (write the spec) then `/spec-impl`
 (implement it). Both skills are installed under `.claude/skills/`, and the specs live in
@@ -45,7 +52,7 @@ Features go through a **spec-driven workflow**: `/spec` (write the spec) then `/
 
 ## Game runtime (`app/lib/arcade/`)
 
-Real games are framework-free TypeScript engines behind a small contract. `app/lib/games.ts` is
+Real games are framework-free TypeScript engines behind a small contract. The `games` table is
 the **catalog** (what the library lists); `app/lib/arcade/` is the **runtime** (what actually
 plays). Do not put game code in `app/games/<id>/` — a static segment there shadows
 `app/games/[id]/page.tsx` and the game's detail page disappears.
@@ -70,8 +77,11 @@ plays). Do not put game code in `app/games/<id>/` — a static segment there sha
 stay as it was. Neither component may mention a game id.
 
 **Adding the next game** (tetris and arkanoid wait in `references/started-games/`): create
-`app/lib/arcade/<id>/` with an `index.ts` that satisfies `ArcadeGameModule`, add one line to
-`registry.ts`, and add the catalog entry in `games.ts` if the id is new. Port engines from the
+`app/lib/arcade/<id>/` with an `index.ts` that satisfies `ArcadeGameModule` and add one line to
+`registry.ts`. If the id is new, its catalog entry is **seeded with a migration** that inserts the
+row into `games` (`npm run db:migration add_<id>` with an `insert` including a unique `position`),
+not added to `games.ts`. Both halves are needed: a registered game with no `games` row has no detail
+page (`getGame` returns `null` → 404), and a row with no registry entry stays a mockup. Port engines from the
 references with state in the instance (no module-level globals), colors in `constants.ts`, the
 DOM HUD removed from the canvas, and per-frame physics multiplied by `dt`. Verify by playing, with
 StrictMode on: one loop only (rAF rate equals the display refresh rate) and no orphan loop after
@@ -107,9 +117,59 @@ and is used by the CLI, not by the app.
 it carries the security checklist and the rule that APIs and CLI flags change often, so verify
 against the docs (MCP `search_docs`) or `--help` rather than memory.
 
-Spec 04 installed the plumbing and nothing else: the two clients, session refresh, the linked CLI
-and generated types. **The database still has zero tables**, `supabase/migrations/` is empty on
-purpose, and no screen reads from Supabase — all domain data is still static.
+Spec 04 installed the plumbing (the two clients, session refresh, the linked CLI and generated
+types). Spec 06 added the schema in one migration, `supabase/migrations/*_games_and_scores.sql`.
+
+### Schema and access rules
+
+| Object              | What it holds                                                                         | `anon` / `authenticated` can                                                  |
+| ------------------- | ------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| `games`             | the catalog: `id`, `title`, `short`, `long`, `category`, `cover`, `color`, `position` | `select` (policy `using (true)`)                                              |
+| `scores`            | one row per saved game: `id`, `game_id` → `games.id`, `name`, `score`, `created_at`   | `select` (`using (true)`) and `insert` **only of `game_id`, `name`, `score`** |
+| `game_player_bests` | view: one row per (game, name) — best score and `achieved_at` (when first reached)    | `select`                                                                      |
+| `game_stats`        | view: one row per game with scores — `best` and `score_count`                         | `select`                                                                      |
+| `player_bests`      | view: one row per name — highest single score in any game and its `achieved_at`       | `select`                                                                      |
+
+- **RLS is on in both tables.** There is **no `update` or `delete` policy and no such grant**:
+  nobody can edit or remove a score through the API. Cleanup is SQL in a migration.
+- The migration `revoke all`s first and then grants only the above, so access does not depend on
+  the project's default privileges. `id` and `created_at` are set by the database, so nobody can
+  backdate a score to win a tie.
+- `scores` validates twice in the database: the table `check` (`name ~ '^[A-Z0-9_]{1,10}$'`,
+  `score between 0 and 10000000`) and the insert policy's `with check`, which repeats it.
+- `category`, `cover` and `color` are `text` + `check`, not enums. `cover` has a lax check
+  (`like 'cover-%'`): the closed list lives in the TS type `CoverClass`.
+- **The three views are `security_invoker = true`** — they run with the caller's rights and so obey
+  the RLS of `scores`. A new view must do the same, or it bypasses RLS. Aggregates belong in views,
+  not in JS.
+- **Ties:** same score → whoever reached it first wins (`achieved_at` ascending). The rank is
+  never stored: it is the index + 1 after sorting.
+- **Known risks (accepted in spec 06):** anonymous inserts mean anyone with the public key can post
+  a fake score or an offensive name via REST, and `isPlayable` is only enforced by the Server
+  Action, so a direct REST insert can add scores to mockup games. Anti-cheat, rate limiting and
+  moderation are future specs.
+
+### Reading and writing from the app
+
+Supabase is only ever called **from the server**. No screen imports `lib/supabase/client.ts`;
+Client Components (the hall of fame tabs, the library filters) receive the data as props.
+
+- `app/lib/data/games.ts` (`server-only`) — `getGames()` (ordered by `position`) and
+  `getGame(id)` (`null` → `notFound()`). They **throw** on failure: without a catalog there is no
+  page, and `app/error.tsx` shows REINTENTAR (it calls `unstable_retry`).
+- `app/lib/data/scores.ts` (`server-only`) — `getGameStats`, `getLeaderboard`, `getRecentScores`,
+  `getTopPlayers`, `getPlayerMatrix`. They **never throw**: `null` means "RANKING NO DISPONIBLE"
+  and `[]` means "SIN PUNTUACIONES TODAVÍA" (both rendered by `RankingNotice`), so a scores failure
+  degrades one block and not the page. Their `catch` calls `unstable_rethrow` first — swallowing
+  Next's internal `cookies()` signal would prerender the page statically with "no disponible".
+- Both wrap their functions in React `cache()` (one query per request even if called twice).
+- `app/actions/scores.ts` — Server Action `saveScore({ gameId, name, score })` →
+  `{ ok: true } | { ok: false, error }`. Input is untrusted; it validates types, the name regex, an
+  integer 0–10.000.000, `isPlayable(gameId)` and that the game exists, then inserts with the
+  server client. It is the only writer in the app.
+- Dates are `dd/mm/aaaa` in `Europe/Madrid`; "hace X" is computed on the server at render time.
+  Scores are formatted with `formatScore` (`app/lib/format.ts`), which always groups (`1.200`) —
+  `toLocaleString("es-ES")` does not group 4-digit numbers.
 
 ### Which client goes where
 
@@ -154,8 +214,9 @@ applies it. Never run loose SQL against the remote project without a file backin
   `npx supabase login` (interactive, a human has to run it) and
   `npx supabase link --project-ref vrepjeurrsaekrosmuye`.
 
-**The moment the first table exists in `public`: RLS on, explicit policies, and types regenerated.**
-Not "later".
+**Every new table in `public`: RLS on, explicit policies and grants, and types regenerated — in
+the same migration that creates it.** Not "later". After `db:push`, run the MCP `get_advisors`
+(security).
 
 Two things the skill can't know:
 

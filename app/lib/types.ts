@@ -26,11 +26,9 @@ export type Game = {
   cat: Category;
   cover: CoverClass;
   color: Accent;
-  /** 28450 -> se muestra con toLocaleString("es-ES") */
-  best: number;
-  /** "12.4K", ya viene formateado; NO es un número */
-  plays: string;
 };
+/** Derivado de `scores` (vista `game_stats`): récord y número de filas guardadas del juego. */
+export type GameStats = { best: number; count: number };
 export type ScoreRow = {
   rank: number;
   /** "PX_KAI" */
@@ -58,12 +56,12 @@ export type HomeStat = {
   note: string;
 };
 export type RecentScore = {
-  /** "NEONFOX", uno de los alias de `PLAYERS` */
+  /** "KAI": las iniciales con las que se guardó la puntuación */
   player: string;
-  /** "caida" — el título sale de GAMES, no se duplica aquí */
+  /** "caida" — el título sale del catálogo, no se duplica aquí */
   gameId: string;
   score: number;
-  /** "hace 2 min", cadena fija: no se recalcula */
+  /** "hace 2 min", calculado en el servidor al renderizar (ver `app/lib/data/scores.ts`) */
   ago: string;
   accent: Accent;
 };
@@ -71,6 +69,14 @@ export type TopPlayer = {
   player: string;
   /** El rango (#01..#05) es el índice + 1, no se guarda */
   score: number;
+};
+/** Una fila de la matriz POR JUGADOR del hall of fame. */
+export type PlayerRow = {
+  rank: number;
+  name: string;
+  best: number;
+  /** Solo los juegos en los que tiene marca: gameId -> mejor score. */
+  scores: Record<string, number>;
 };
 export type FaqItem = { q: string; a: string };
 /* ===== acerca de y contacto ===== */

@@ -1,17 +1,24 @@
 "use client";
 import { useMemo, useState } from "react";
 import GameCard from "@/app/components/GameCard";
-import { CATEGORY_FILTERS, GAMES } from "@/app/lib/games";
-import type { CategoryFilter } from "@/app/lib/types";
-export default function GameLibrary() {
+import { CATEGORY_FILTERS } from "@/app/lib/games";
+import type { CategoryFilter, Game } from "@/app/lib/types";
+/** `bests`: gameId -> récord. Un juego sin puntuaciones no aparece y su tarjeta muestra "—". */
+export default function GameLibrary({
+  games,
+  bests,
+}: {
+  games: Game[];
+  bests: Record<string, number>;
+}) {
   const [q, setQ] = useState("");
   const [cat, setCat] = useState<CategoryFilter>("TODOS");
   const filtered = useMemo(
     () =>
-      GAMES.filter(
+      games.filter(
         (g) => (cat === "TODOS" || g.cat === cat) && g.title.toLowerCase().includes(q.toLowerCase())
       ),
-    [q, cat]
+    [games, q, cat]
   );
   return (
     <div className="fade-in">
@@ -45,7 +52,7 @@ export default function GameLibrary() {
       </div>
       <div className="av-grid">
         {filtered.map((g) => (
-          <GameCard key={g.id} game={g} />
+          <GameCard key={g.id} game={g} best={bests[g.id] ?? null} />
         ))}
         {filtered.length === 0 && (
           <div
