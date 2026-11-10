@@ -28,17 +28,54 @@ No test runner is configured. If tests are needed, pick and install one before w
 ## What this project is
 
 Arcade Vault — a platform for playing games online and competing for the highest score. Specs
-01–03 are implemented: landing (`/`), game library (`/games`), game detail and play screens
+01–05 are implemented. The screens: landing (`/`), game library (`/games`), game detail and play screens
 (`/games/[id]`, `/games/[id]/play`), hall of fame (`/hall-of-fame`), about + contact form wired
 to Resend (`/about`) and a **mock** login (`/login` — `AuthForm.tsx` validates nothing, creates
 no session, just navigates to `/games`).
 
 All domain data is still **static**, hardcoded in `app/lib/{games,scores,home,about}.ts`. There
-is no database behind any screen yet, and no real games — the play screen is a mockup.
+is no database behind any screen yet. **One game is real** since spec 05: `asteroides` plays on a
+canvas with a live HUD. The other eight catalog entries (including `rocas`, a separate mockup) still
+render the mockup play screen. Scores are **not saved** anywhere — the end-of-game modal, the
+leaderboards and `best` are still invented.
 
 Features go through a **spec-driven workflow**: `/spec` (write the spec) then `/spec-impl`
 (implement it). Both skills are installed under `.claude/skills/`, and the specs live in
 `specs/NN-slug.md`. Write the spec before implementing a feature.
+
+## Game runtime (`app/lib/arcade/`)
+
+Real games are framework-free TypeScript engines behind a small contract. `app/lib/games.ts` is
+the **catalog** (what the library lists); `app/lib/arcade/` is the **runtime** (what actually
+plays). Do not put game code in `app/games/<id>/` — a static segment there shadows
+`app/games/[id]/page.tsx` and the game's detail page disappears.
+
+- `types.ts` — the contract. An engine receives a canvas and an `onSnapshot` callback and exposes
+  `start / pause / resume / end / restart / destroy`, all idempotent. It publishes
+  `{ score, lives, level, status }` **only when a value changes**, never per frame; anything that
+  changes every frame (e.g. the `3x 4.7s` timer) is drawn inside the canvas instead.
+- `registry.ts` — `id → () => import(...)`. **The only source of truth for "this game is
+  playable"**: `isPlayable(id)` drives the real play screen, the `JUGABLE` badge on `GameCard` and
+  the detail page. Never add a `playable` flag to the catalog.
+- `math.ts`, `keyboard.ts` — shared by every game. The keyboard listens on `window` (a listener on
+  the canvas leaves keys stuck on keyup outside it) and `pressed()` is consumed on read.
+- `<game>/index.ts` — the game's only public entry: default export with `width`, `height`,
+  `controls` (rows for the start overlay) and `createEngine`. Nothing outside the folder imports
+  its `engine`, `entities` or `constants`.
+
+`app/components/GameCanvas.tsx` owns everything React/DOM: the dynamic `import()` inside an effect
+(so the engine never runs on the server), the start overlay, `preventDefault` of arrows/space
+**only while `playing`**, `Esc`, auto-pause on window blur / hidden tab / click outside, and
+`destroy()` on unmount. `GamePlayerScreen.tsx` branches on `isPlayable`; the mockup branch must
+stay as it was. Neither component may mention a game id.
+
+**Adding the next game** (tetris and arkanoid wait in `references/started-games/`): create
+`app/lib/arcade/<id>/` with an `index.ts` that satisfies `ArcadeGameModule`, add one line to
+`registry.ts`, and add the catalog entry in `games.ts` if the id is new. Port engines from the
+references with state in the instance (no module-level globals), colors in `constants.ts`, the
+DOM HUD removed from the canvas, and per-frame physics multiplied by `dt`. Verify by playing, with
+StrictMode on: one loop only (rAF rate equals the display refresh rate) and no orphan loop after
+leaving the page.
 
 ## Stack and conventions
 

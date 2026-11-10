@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import Leaderboard from "@/app/components/Leaderboard";
+import { isPlayable } from "@/app/lib/arcade/registry";
 import { GAMES, getGame } from "@/app/lib/games";
 import { gameSeed, seededScores } from "@/app/lib/scores";
 type Props = { params: Promise<{ id: string }> };
@@ -25,6 +26,7 @@ export default async function GameDetailPage({ params }: Props) {
       <div>
         <div className="detail-cover">
           <div className={"cover-bg " + game.cover} />
+          {isPlayable(game.id) && <div className="playable-badge">JUGABLE</div>}
         </div>
         <div style={{ marginTop: 20 }} className="detail-info">
           <div className="detail-tags">

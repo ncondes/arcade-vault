@@ -1,6 +1,17 @@
 import type { CategoryFilter, Game } from "@/app/lib/types";
 export const GAMES: Game[] = [
   {
+    id: "asteroides",
+    title: "ASTEROIDES",
+    short: "Parte las rocas antes de que te partan a ti.",
+    long: "Tu nave deriva sin fricción por un campo de asteroides que no tiene bordes: sal por un lado y vuelves por el otro. Cada roca grande se parte en dos medianas, y cada mediana en dos pequeñas — más rápidas, más pequeñas y más difíciles de acertar. Si la suerte acompaña, caerá un módulo de disparo triple.",
+    cat: "SHOOTER",
+    cover: "cover-asteroides",
+    color: "yellow",
+    best: 12800,
+    plays: "1.2K",
+  },
+  {
     id: "bloque-buster",
     title: "BLOQUE BUSTER",
     short: "Rebota la pelota y destruye muros de neón.",
