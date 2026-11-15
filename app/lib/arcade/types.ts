@@ -7,7 +7,8 @@ export type ArcadeStatus = "idle" | "playing" | "paused" | "gameover";
  *  (impacto, muerte, nivel), nunca cada fotograma. */
 export type ArcadeSnapshot = {
   score: number;
-  lives: number;
+  /** `null` = el juego no tiene vidas: el HUD oculta "Vidas". */
+  lives: number | null;
   level: number;
   status: ArcadeStatus;
 };
@@ -24,7 +25,7 @@ export type ArcadeEngine = {
   resume(): void;
   /** Aborta la partida: pasa a "gameover" con la puntuación actual. No toca vidas. */
   end(): void;
-  /** Nivel 1, puntuación a cero, vidas a 3. */
+  /** Nivel 1, puntuación a cero y vidas a su valor inicial. */
   restart(): void;
   /** Cancela el rAF y suelta todos los listeners. Se puede llamar dos veces. */
   destroy(): void;

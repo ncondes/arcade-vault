@@ -785,6 +785,100 @@
     image-rendering: pixelated;
   }
 
+  /* Tuerca: lo contrario de .cover-tetro (bloques sueltos flotando sobre violeta).
+     Aquí hay un pozo de 10×12 celdas con su contorno cian, una pila abajo con un
+     hueco de tres columnas, y la tuerca metálica cayendo hacia su fantasma, que
+     encaja en el hueco y deja su centro vacío. Cada fila de la pila es una sola
+     banda con paradas duras; la rejilla oscura de encima separa las celdas. */
+  .cover-tuerca {
+    --well-h: 84%;
+    --well-b: 6%;
+    background:
+      radial-gradient(ellipse at 50% 100%, rgba(0, 245, 255, 0.14), transparent 65%),
+      linear-gradient(180deg, #071824, #03060c);
+  }
+  .cover-tuerca::before,
+  .cover-tuerca::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    bottom: var(--well-b);
+    height: var(--well-h);
+    aspect-ratio: 10 / 12;
+    transform: translateX(-50%);
+  }
+  /* El pozo: content-box para que el aspect-ratio mida el interior y el borde
+     quede por fuera, a ras de las celdas de ::after. */
+  .cover-tuerca::before {
+    box-sizing: content-box;
+    margin-bottom: -2px;
+    border: 2px solid var(--cyan);
+    border-top: 0;
+    box-shadow:
+      0 0 10px rgba(0, 245, 255, 0.45),
+      inset 0 -6px 14px rgba(0, 245, 255, 0.12);
+    background:
+      repeating-linear-gradient(90deg, rgba(0, 245, 255, 0.07) 0 1px, transparent 1px 10%),
+      repeating-linear-gradient(
+        180deg,
+        rgba(0, 245, 255, 0.07) 0 1px,
+        transparent 1px calc(100% / 12)
+      );
+  }
+  /* Fila j: posición vertical calc(100% * j / 11), alto calc(100% / 12).
+     Columna k: de k·10% a (k+1)·10%. */
+  .cover-tuerca::after {
+    background:
+      /* rejilla que separa las celdas */
+      repeating-linear-gradient(90deg, #03060c 0 1px, transparent 1px 10%) 0 0 / 100% 100%,
+      repeating-linear-gradient(180deg, #03060c 0 1px, transparent 1px calc(100% / 12)) 0 0 / 100%
+        100%,
+      /* la tuerca, filas 2–4, columnas 3–5: arriba más clara, abajo más oscura */
+        linear-gradient(90deg, transparent 30%, #dde2ec 30% 60%, transparent 60%) 0
+        calc(100% * 2 / 11) / 100% calc(100% / 12) no-repeat,
+      linear-gradient(
+          90deg,
+          transparent 30%,
+          #aeb6c6 30% 40%,
+          transparent 40% 50%,
+          #aeb6c6 50% 60%,
+          transparent 60%
+        )
+        0 calc(100% * 3 / 11) / 100% calc(100% / 12) no-repeat,
+      linear-gradient(90deg, transparent 30%, #7f8899 30% 60%, transparent 60%) 0
+        calc(100% * 4 / 11) / 100% calc(100% / 12) no-repeat,
+      /* su fantasma, filas 9–11, en el hueco de la pila */
+        linear-gradient(90deg, transparent 30%, rgba(174, 182, 198, 0.26) 30% 60%, transparent 60%)
+        0 calc(100% * 9 / 11) / 100% calc(100% / 12) no-repeat,
+      linear-gradient(
+          90deg,
+          transparent 30%,
+          rgba(174, 182, 198, 0.26) 30% 40%,
+          transparent 40% 50%,
+          rgba(174, 182, 198, 0.26) 50% 60%,
+          transparent 60%
+        )
+        0 calc(100% * 10 / 11) / 100% calc(100% / 12) no-repeat,
+      linear-gradient(90deg, transparent 30%, rgba(174, 182, 198, 0.26) 30% 60%, transparent 60%) 0
+        100% / 100% calc(100% / 12) no-repeat,
+      /* la pila, filas 8–11, con el hueco en las columnas 3–5 */
+        linear-gradient(90deg, #3d7bff 0 10%, transparent 10% 90%, #ff8a00 90%) 0
+        calc(100% * 8 / 11) / 100% calc(100% / 12) no-repeat,
+      linear-gradient(90deg, #3d7bff 0 30%, transparent 30% 60%, #f5ff00 60% 80%, #ff8a00 80%) 0
+        calc(100% * 9 / 11) / 100% calc(100% / 12) no-repeat,
+      linear-gradient(
+          90deg,
+          #ff3355 0 20%,
+          #ff00e5 20% 30%,
+          transparent 30% 60%,
+          #f5ff00 60% 80%,
+          #00ff88 80%
+        )
+        0 calc(100% * 10 / 11) / 100% calc(100% / 12) no-repeat,
+      linear-gradient(90deg, #00ff88 0 10%, #ff00e5 10% 30%, transparent 30% 60%, #00f5ff 60%) 0
+        100% / 100% calc(100% / 12) no-repeat;
+    filter: drop-shadow(0 0 5px rgba(0, 245, 255, 0.25));
+  }
   .cover-snake {
     background: linear-gradient(135deg, #003a2a, #0a0a18);
   }

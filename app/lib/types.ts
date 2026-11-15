@@ -13,7 +13,8 @@ export type CoverClass =
   | "cover-invaders"
   | "cover-rocas"
   | "cover-rana"
-  | "cover-duelo";
+  | "cover-duelo"
+  | "cover-tuerca";
 export type Game = {
   /** Slug de la URL: /games/bloque-buster */
   id: string;

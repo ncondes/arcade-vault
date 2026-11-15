@@ -28,7 +28,7 @@ No test runner is configured. If tests are needed, pick and install one before w
 ## What this project is
 
 Arcade Vault — a platform for playing games online and competing for the highest score. Specs
-01–06 are implemented. The screens: landing (`/`), game library (`/games`), game detail and play screens
+01–07 are implemented. The screens: landing (`/`), game library (`/games`), game detail and play screens
 (`/games/[id]`, `/games/[id]/play`), hall of fame (`/hall-of-fame`), about + contact form wired
 to Resend (`/about`) and a **mock** login (`/login` — `AuthForm.tsx` validates nothing, creates
 no session, just navigates to `/games`).
@@ -42,13 +42,16 @@ request** (no `generateStaticParams`, no ISR), so a saved score shows on reload.
 
 What is still static: the marketing copy in `app/lib/home.ts` (`FEATURES`, `HOME_STATS` except the
 game count, `FAQ`), `app/lib/about.ts`, and `CATEGORY_FILTERS` in `app/lib/games.ts` (UI, not
-data). **One game is real** since spec 05: `asteroides` plays on a canvas with a live HUD and its
-end-of-game modal saves the score. The other eight catalog entries (including `rocas`, a separate
-mockup) still render the mockup play screen, whose HUD shows `0` and whose modal saves nothing.
+data). **Two games are real**: `asteroides` (spec 05) and `tuerca` (spec 07, a falling-pieces
+puzzle with an eighth piece, the nut) play on a canvas with a live HUD, and their end-of-game modal
+saves the score. The other eight catalog entries (including `rocas` and `caida`, separate mockups)
+still render the mockup play screen, whose HUD shows `0` and whose modal saves nothing.
 
 Features go through a **spec-driven workflow**: `/spec` (write the spec) then `/spec-impl`
 (implement it). Both skills are installed under `.claude/skills/`, and the specs live in
-`specs/NN-slug.md`. Write the spec before implementing a feature.
+`specs/NN-slug.md`. Write the spec before implementing a feature. For a **new game**, use
+`/new-game <reference folder | idea>` instead of `/spec`: it writes the game spec (contract gaps,
+catalog seed, standard plan and criteria) by following `/spec`'s rules, then run `/spec-impl`.
 
 ## Game runtime (`app/lib/arcade/`)
 
@@ -60,15 +63,23 @@ plays). Do not put game code in `app/games/<id>/` — a static segment there sha
 - `types.ts` — the contract. An engine receives a canvas and an `onSnapshot` callback and exposes
   `start / pause / resume / end / restart / destroy`, all idempotent. It publishes
   `{ score, lives, level, status }` **only when a value changes**, never per frame; anything that
-  changes every frame (e.g. the `3x 4.7s` timer) is drawn inside the canvas instead.
+  changes every frame (e.g. the `3x 4.7s` timer) is drawn inside the canvas instead, and so is
+  anything only one game has (tuerca's LÍNEAS and SIGUIENTE). `lives: null` means "this game has no
+  lives" (tuerca): the HUD hides "Vidas". Before the first snapshot the HUD shows the default 3
+  hearts, so it tells "no snapshot yet" from `null` (`snapshot ? snapshot.lives : 3`, never `??`).
 - `registry.ts` — `id → () => import(...)`. **The only source of truth for "this game is
   playable"**: `isPlayable(id)` drives the real play screen, the `JUGABLE` badge on `GameCard` and
   the detail page. Never add a `playable` flag to the catalog.
 - `math.ts`, `keyboard.ts` — shared by every game. The keyboard listens on `window` (a listener on
-  the canvas leaves keys stuck on keyup outside it) and `pressed()` is consumed on read.
+  the canvas leaves keys stuck on keyup outside it). Three ways to read it: `held()` (down now),
+  `pressed()` (pressed since the last read, OS auto-repeat ignored, consumed on read) and `typed()`
+  (how many keydowns since the last read, auto-repeat included, consumed on read — for move/rotate
+  that repeat at the system's rate). `start()` runs while the starting keydown is still bubbling
+  to `window`, so the listener `attach()` just added receives it: clear the keyboard on the first
+  frame after start/resume too (tuerca does), or the start key also acts in the game.
 - `<game>/index.ts` — the game's only public entry: default export with `width`, `height`,
   `controls` (rows for the start overlay) and `createEngine`. Nothing outside the folder imports
-  its `engine`, `entities` or `constants`.
+  its `engine`, `constants` or helpers (`entities`, `board`).
 
 `app/components/GameCanvas.tsx` owns everything React/DOM: the dynamic `import()` inside an effect
 (so the engine never runs on the server), the start overlay, `preventDefault` of arrows/space
@@ -76,7 +87,8 @@ plays). Do not put game code in `app/games/<id>/` — a static segment there sha
 `destroy()` on unmount. `GamePlayerScreen.tsx` branches on `isPlayable`; the mockup branch must
 stay as it was. Neither component may mention a game id.
 
-**Adding the next game** (tetris and arkanoid wait in `references/started-games/`): create
+**Adding the next game** (only arkanoid waits in `references/started-games/`, since tetris became
+`tuerca`; start with `/new-game`, which produces the spec): create
 `app/lib/arcade/<id>/` with an `index.ts` that satisfies `ArcadeGameModule` and add one line to
 `registry.ts`. If the id is new, its catalog entry is **seeded with a migration** that inserts the
 row into `games` (`npm run db:migration add_<id>` with an `insert` including a unique `position`),
