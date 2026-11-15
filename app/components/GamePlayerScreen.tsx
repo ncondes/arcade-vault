@@ -34,7 +34,9 @@ export default function GamePlayerScreen({ game }: { game: Game }) {
   const sending = useRef(false);
   // En la maqueta no hay partida: el HUD marca 0 en vez de un récord que no es suyo.
   const score = playable ? (snapshot?.score ?? 0) : 0;
-  const lives = playable ? (snapshot?.lives ?? LIVES) : LIVES;
+  // Sin instantánea todavía → LIVES, como antes. Con instantánea → su valor,
+  // `null` incluido ("este juego no tiene vidas"): `null ?? LIVES` daría 3.
+  const lives = playable ? (snapshot ? snapshot.lives : LIVES) : LIVES;
   const level = playable ? (snapshot?.level ?? 1) : LEVEL;
   const paused = playable ? snapshot?.status === "paused" : mockPaused;
   const over = playable ? snapshot?.status === "gameover" : mockOver;
@@ -87,10 +89,12 @@ export default function GamePlayerScreen({ game }: { game: Game }) {
             <div className="l">Puntuación</div>
             <div className="v">{formatScore(score)}</div>
           </div>
-          <div className="hud-stat lives">
-            <div className="l">Vidas</div>
-            <div className="v">{"♥ ".repeat(Math.max(lives, 0)).trim() || "—"}</div>
-          </div>
+          {lives !== null && (
+            <div className="hud-stat lives">
+              <div className="l">Vidas</div>
+              <div className="v">{"♥ ".repeat(Math.max(lives, 0)).trim() || "—"}</div>
+            </div>
+          )}
           <div className="hud-stat level">
             <div className="l">Nivel</div>
             <div className="v">{String(level).padStart(2, "0")}</div>
