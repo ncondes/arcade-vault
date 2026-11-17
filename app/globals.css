@@ -879,6 +879,127 @@
         100% / 100% calc(100% / 12) no-repeat;
     filter: drop-shadow(0 0 5px rgba(0, 245, 255, 0.25));
   }
+  /* Ladrillazo: lo contrario de .cover-bricks (franjas de cuatro colores a sangre).
+     Aquí hay un muro de un solo tono, magenta, aparejado a soga (las filas impares
+     desplazadas medio ladrillo) y escalonado: cada fila pierde medio ladrillo por
+     cada lado. Una brecha en diagonal lo atraviesa de abajo hacia arriba a la
+     derecha, y la bola sube hacia ella desde la pala, con su estela.
+     El muro se aclara hacia abajo: la fila más cerca de la bola es la más caliente. */
+  .cover-ladrillazo {
+    background:
+      radial-gradient(ellipse at 50% 32%, rgba(255, 0, 110, 0.2), transparent 62%),
+      linear-gradient(180deg, #17040f, #050208);
+  }
+  .cover-ladrillazo::before,
+  .cover-ladrillazo::after {
+    content: "";
+    position: absolute;
+  }
+  /* El muro: 8 columnas de 12,5 % y 5 filas de 16 % de alto con un paso de 20 %.
+     Fila j: posición vertical j · 100/84 · 20 % (el % de background-position se
+     mide sobre el hueco que deja la capa). Cada ladrillo deja 1,2 % de llaga. */
+  .cover-ladrillazo::before {
+    left: 12%;
+    right: 12%;
+    top: 13%;
+    height: 38%;
+    background:
+      /* fila 0: 8 ladrillos, de 0 a 100 */
+      linear-gradient(
+          90deg,
+          #ff006e 0 11.3%,
+          transparent 11.3% 12.5%,
+          #ff006e 12.5% 23.8%,
+          transparent 23.8% 25%,
+          #ff006e 25% 36.3%,
+          transparent 36.3% 37.5%,
+          #ff006e 37.5% 48.8%,
+          transparent 48.8% 50%,
+          #ff006e 50% 61.3%,
+          transparent 61.3% 62.5%,
+          #ff006e 62.5% 73.8%,
+          transparent 73.8% 75%,
+          #ff006e 75% 86.3%,
+          transparent 86.3% 87.5%,
+          #ff006e 87.5% 98.8%,
+          transparent 98.8%
+        )
+        0 0 / 100% 16% no-repeat,
+      /* fila 1, a soga: 7 ladrillos, de 6,25 a 93,75 */
+        linear-gradient(
+          90deg,
+          transparent 6.25%,
+          #ff2a86 6.25% 17.55%,
+          transparent 17.55% 18.75%,
+          #ff2a86 18.75% 30.05%,
+          transparent 30.05% 31.25%,
+          #ff2a86 31.25% 42.55%,
+          transparent 42.55% 43.75%,
+          #ff2a86 43.75% 55.05%,
+          transparent 55.05% 56.25%,
+          #ff2a86 56.25% 67.55%,
+          transparent 67.55% 68.75%,
+          #ff2a86 68.75% 80.05%,
+          transparent 80.05% 81.25%,
+          #ff2a86 81.25% 92.55%,
+          transparent 92.55%
+        )
+        0 23.81% / 100% 16% no-repeat,
+      /* fila 2: 6 ladrillos, de 12,5 a 87,5, sin el de 62,5 (la brecha) */
+        linear-gradient(
+          90deg,
+          transparent 12.5%,
+          #ff4f9d 12.5% 23.8%,
+          transparent 23.8% 25%,
+          #ff4f9d 25% 36.3%,
+          transparent 36.3% 37.5%,
+          #ff4f9d 37.5% 48.8%,
+          transparent 48.8% 50%,
+          #ff4f9d 50% 61.3%,
+          transparent 61.3% 75%,
+          #ff4f9d 75% 86.3%,
+          transparent 86.3%
+        )
+        0 47.62% / 100% 16% no-repeat,
+      /* fila 3, a soga: 5 ladrillos, de 18,75 a 81,25, sin el de 56,25 */
+        linear-gradient(
+          90deg,
+          transparent 18.75%,
+          #ff79b6 18.75% 30.05%,
+          transparent 30.05% 31.25%,
+          #ff79b6 31.25% 42.55%,
+          transparent 42.55% 43.75%,
+          #ff79b6 43.75% 55.05%,
+          transparent 55.05% 68.75%,
+          #ff79b6 68.75% 80.05%,
+          transparent 80.05%
+        )
+        0 71.43% / 100% 16% no-repeat,
+      /* fila 4: 4 ladrillos, de 25 a 75, sin el de 50 */
+        linear-gradient(
+          90deg,
+          transparent 25%,
+          #ffa3cf 25% 36.3%,
+          transparent 36.3% 37.5%,
+          #ffa3cf 37.5% 48.8%,
+          transparent 48.8% 62.5%,
+          #ffa3cf 62.5% 73.8%,
+          transparent 73.8%
+        )
+        0 95.24% / 100% 16% no-repeat;
+    filter: drop-shadow(0 0 7px rgba(255, 0, 110, 0.55));
+  }
+  /* La bola subiendo hacia la brecha, dos puntos de estela y la pala. */
+  .cover-ladrillazo::after {
+    inset: 0;
+    background:
+      radial-gradient(circle at 49% 64%, #fff2f8 0 4.5px, transparent 5.5px),
+      radial-gradient(circle at 49% 64%, rgba(255, 0, 110, 0.55) 0 7px, transparent 14px),
+      radial-gradient(circle at 44.5% 72%, rgba(255, 121, 182, 0.55) 0 3px, transparent 4px),
+      radial-gradient(circle at 40% 80%, rgba(255, 121, 182, 0.28) 0 2px, transparent 3px),
+      linear-gradient(180deg, #ffd1e6 0 30%, #ff006e 30%) 34% 88% / 22% 9px no-repeat;
+    filter: drop-shadow(0 0 6px rgba(255, 0, 110, 0.6));
+  }
   .cover-snake {
     background: linear-gradient(135deg, #003a2a, #0a0a18);
   }

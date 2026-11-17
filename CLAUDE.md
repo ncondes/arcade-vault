@@ -42,10 +42,11 @@ request** (no `generateStaticParams`, no ISR), so a saved score shows on reload.
 
 What is still static: the marketing copy in `app/lib/home.ts` (`FEATURES`, `HOME_STATS` except the
 game count, `FAQ`), `app/lib/about.ts`, and `CATEGORY_FILTERS` in `app/lib/games.ts` (UI, not
-data). **Two games are real**: `asteroides` (spec 05) and `tuerca` (spec 07, a falling-pieces
-puzzle with an eighth piece, the nut) play on a canvas with a live HUD, and their end-of-game modal
-saves the score. The other eight catalog entries (including `rocas` and `caida`, separate mockups)
-still render the mockup play screen, whose HUD shows `0` and whose modal saves nothing.
+data). **Three games are real**: `asteroides` (spec 05), `tuerca` (spec 07, a falling-pieces
+puzzle with an eighth piece, the nut) and `ladrillazo` (spec 08, a brick breaker with the
+reference's sprites and sounds) play on a canvas with a live HUD, and their end-of-game modal saves
+the score. The other eight catalog entries (including `rocas`, `caida` and `bloque-buster`, separate
+mockups) still render the mockup play screen, whose HUD shows `0` and whose modal saves nothing.
 
 Features go through a **spec-driven workflow**: `/spec` (write the spec) then `/spec-impl`
 (implement it). Both skills are installed under `.claude/skills/`, and the specs live in
@@ -76,10 +77,25 @@ plays). Do not put game code in `app/games/<id>/` — a static segment there sha
   (how many keydowns since the last read, auto-repeat included, consumed on read — for move/rotate
   that repeat at the system's rate). `start()` runs while the starting keydown is still bubbling
   to `window`, so the listener `attach()` just added receives it: clear the keyboard on the first
-  frame after start/resume too (tuerca does), or the start key also acts in the game.
+  frame after start/resume too (tuerca and ladrillazo do), or the start key also acts in the game.
 - `<game>/index.ts` — the game's only public entry: default export with `width`, `height`,
   `controls` (rows for the start overlay) and `createEngine`. Nothing outside the folder imports
-  its `engine`, `constants` or helpers (`entities`, `board`).
+  its `engine`, `constants` or helpers (`entities`, `board`, `levels`, `sprites`, `sounds`).
+
+Mouse, images and sound live **inside the engine**; the contract does not change for them
+(ladrillazo is the precedent):
+
+- **Mouse** — the engine listens to `pointermove` on the canvas it receives (never `document`: it
+  would break pause-on-click-outside), scales by `W / rect.width` (never `canvas.width`, which is
+  `W · dpr` with HiDPI), acts only while `playing`, and `destroy()` removes the listener.
+- **Assets** — files in `public/games/<id>/` (with a `CREDITS.md`), loaded by the engine with
+  `new Image()` per instance, never through the bundler. Nothing is drawn until the image loads,
+  there is one `draw()` on load, and pixel art sets `imageSmoothingEnabled = false` after the HiDPI
+  `setTransform`.
+- **Sound** — one `Audio` per effect in the instance, played with
+  `cloneNode().play().catch(() => {})` (the rejection is swallowed so the console stays clean), and
+  only from `update`, so it is silent while idle, paused or on the modal. There is no platform
+  volume or mute yet: that belongs to a platform spec.
 
 `app/components/GameCanvas.tsx` owns everything React/DOM: the dynamic `import()` inside an effect
 (so the engine never runs on the server), the start overlay, `preventDefault` of arrows/space
@@ -87,8 +103,8 @@ plays). Do not put game code in `app/games/<id>/` — a static segment there sha
 `destroy()` on unmount. `GamePlayerScreen.tsx` branches on `isPlayable`; the mockup branch must
 stay as it was. Neither component may mention a game id.
 
-**Adding the next game** (only arkanoid waits in `references/started-games/`, since tetris became
-`tuerca`; start with `/new-game`, which produces the spec): create
+**Adding the next game** (no reference waits in `references/started-games/` any more: tetris
+became `tuerca` and arkanoid became `ladrillazo`; start with `/new-game`, which produces the spec): create
 `app/lib/arcade/<id>/` with an `index.ts` that satisfies `ArcadeGameModule` and add one line to
 `registry.ts`. If the id is new, its catalog entry is **seeded with a migration** that inserts the
 row into `games` (`npm run db:migration add_<id>` with an `insert` including a unique `position`),
