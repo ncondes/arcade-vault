@@ -1000,21 +1000,71 @@
       linear-gradient(180deg, #ffd1e6 0 30%, #ff006e 30%) 34% 88% / 22% 9px no-repeat;
     filter: drop-shadow(0 0 6px rgba(255, 0, 110, 0.6));
   }
+  /* Serpentina: el tablero del juego en pequeño. Una rejilla de 8×6 celdas, y la
+     serpiente en S, dibujada como en el canvas (segmentos con margen unidos por
+     puentes), que se aclara de la cola a la cabeza. La cabeza mira con sus dos ojos
+     a la manzana pixelada que tiene delante, a una celda de distancia.
+     Cada rectángulo es una capa: con tamaño s y borde izquierdo x (en % del
+     tablero), su background-position es x / (100 − s) · 100 %. */
   .cover-snake {
-    background: linear-gradient(135deg, #003a2a, #0a0a18);
+    background:
+      radial-gradient(ellipse at 50% 55%, rgba(0, 255, 136, 0.13), transparent 65%),
+      linear-gradient(180deg, #04140d, #020604);
   }
+  .cover-snake::before,
   .cover-snake::after {
     content: "";
     position: absolute;
-    inset: 0;
-    background-image:
-      radial-gradient(circle at 70% 50%, var(--magenta) 0 6px, transparent 7px),
-      linear-gradient(90deg, var(--green) 0 40px, transparent 40px) 20% 50% / 200px 12px no-repeat,
-      linear-gradient(90deg, var(--green) 0 12px, transparent 12px) calc(20% + 40px)
-        calc(50% - 12px) / 12px 12px no-repeat,
-      linear-gradient(90deg, var(--green) 0 12px, transparent 12px) calc(20% + 28px)
-        calc(50% - 12px) / 12px 12px no-repeat;
-    filter: drop-shadow(0 0 6px rgba(0, 255, 136, 0.6));
+    left: 50%;
+    top: 50%;
+    height: 68%;
+    aspect-ratio: 8 / 6;
+    transform: translate(-50%, -50%);
+  }
+  /* El tablero: rejilla tenue, borde y la manzana en la celda (7, 3) con su halo. */
+  .cover-snake::before {
+    /* content-box: el borde queda por fuera y el interior coincide con ::after. */
+    box-sizing: content-box;
+    border: 1px solid rgba(0, 255, 136, 0.28);
+    box-shadow: 0 0 12px rgba(0, 255, 136, 0.18);
+    background:
+      /* brillo */
+      linear-gradient(#ffc2cc, #ffc2cc) 91.77% 57.63% / 1.25% 1.67% no-repeat,
+      /* rabito */ linear-gradient(#8a5a2b, #8a5a2b) 94.32% 53.17% / 1% 2.83% no-repeat,
+      /* hoja */ linear-gradient(#3fbf4f, #3fbf4f) 96.42% 52.96% / 2.12% 1.5% no-repeat,
+      /* sombra */ linear-gradient(#b3123a, #b3123a) 98.73% 60.36% / 1.25% 7.5% no-repeat,
+      /* cuerpo */ linear-gradient(#ff3355, #ff3355) 98.61% 60.36% / 10% 7.5% no-repeat,
+      /* cuerpo, sin esquinas */ linear-gradient(#ff3355, #ff3355) 97.3% 60.75% / 7.5% 10.83%
+        no-repeat,
+      /* halo */ radial-gradient(circle at 93.75% 59%, rgba(255, 51, 85, 0.35), transparent 11%),
+      /* rejilla */
+        repeating-linear-gradient(90deg, rgba(0, 255, 136, 0.09) 0 1px, transparent 1px 12.5%),
+      repeating-linear-gradient(
+        180deg,
+        rgba(0, 255, 136, 0.09) 0 1px,
+        transparent 1px calc(100% / 6)
+      );
+  }
+  /* La serpiente. Las capas de arriba tapan a las de abajo: ojos, cabeza, y los
+     tramos de la cabeza a la cola, cada vez más oscuros. */
+  .cover-snake::after {
+    background:
+      /* ojo de arriba */
+      linear-gradient(#04140d, #04140d) 71.17% 55.14% / 2% 2.67% no-repeat,
+      /* ojo de abajo */ linear-gradient(#04140d, #04140d) 71.17% 61.99% / 2% 2.67% no-repeat,
+      /* cabeza, mirando a la fruta */ linear-gradient(#7dffc0, #7dffc0) 70.72% 59.54% / 9.5% 12.67%
+        no-repeat,
+      /* tramo 5: fila 3, columnas 4–5 */ linear-gradient(var(--green), var(--green)) 66.03%
+        59.54% / 22% 12.67% no-repeat,
+      /* tramo 4: columna 4, filas 2–3 */ linear-gradient(var(--green), var(--green)) 56.91% 50% /
+        9.5% 29.33% no-repeat,
+      /* tramo 3: fila 2, columnas 2–4 */ linear-gradient(var(--green), var(--green)) 40.46%
+        40.46% / 34.5% 12.67% no-repeat,
+      /* tramo 2: columna 2, filas 2–4 */ linear-gradient(#00d474, #00d474) 29.28% 65.43% / 9.5% 46%
+        no-repeat,
+      /* tramo 1, la cola: fila 4, columnas 1–2 */ linear-gradient(#00a85c, #00a85c) 17.95% 78.63% /
+        22% 12.67% no-repeat;
+    filter: drop-shadow(0 0 6px rgba(0, 255, 136, 0.55));
   }
 
   .cover-glot {
