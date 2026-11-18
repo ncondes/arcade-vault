@@ -8,6 +8,7 @@ const LOADERS: Record<string, ArcadeLoader> = {
   asteroides: () => import("@/app/lib/arcade/asteroides").then((m) => m.default),
   tuerca: () => import("@/app/lib/arcade/tuerca").then((m) => m.default),
   ladrillazo: () => import("@/app/lib/arcade/ladrillazo").then((m) => m.default),
+  serpentina: () => import("@/app/lib/arcade/serpentina").then((m) => m.default),
 };
 export function isPlayable(id: string): boolean {
   return Object.prototype.hasOwnProperty.call(LOADERS, id);

@@ -28,7 +28,7 @@ No test runner is configured. If tests are needed, pick and install one before w
 ## What this project is
 
 Arcade Vault — a platform for playing games online and competing for the highest score. Specs
-01–07 are implemented. The screens: landing (`/`), game library (`/games`), game detail and play screens
+01–09 are implemented. The screens: landing (`/`), game library (`/games`), game detail and play screens
 (`/games/[id]`, `/games/[id]/play`), hall of fame (`/hall-of-fame`), about + contact form wired
 to Resend (`/about`) and a **mock** login (`/login` — `AuthForm.tsx` validates nothing, creates
 no session, just navigates to `/games`).
@@ -42,11 +42,13 @@ request** (no `generateStaticParams`, no ISR), so a saved score shows on reload.
 
 What is still static: the marketing copy in `app/lib/home.ts` (`FEATURES`, `HOME_STATS` except the
 game count, `FAQ`), `app/lib/about.ts`, and `CATEGORY_FILTERS` in `app/lib/games.ts` (UI, not
-data). **Three games are real**: `asteroides` (spec 05), `tuerca` (spec 07, a falling-pieces
-puzzle with an eighth piece, the nut) and `ladrillazo` (spec 08, a brick breaker with the
-reference's sprites and sounds) play on a canvas with a live HUD, and their end-of-game modal saves
-the score. The other eight catalog entries (including `rocas`, `caida` and `bloque-buster`, separate
-mockups) still render the mockup play screen, whose HUD shows `0` and whose modal saves nothing.
+data). **Four games are real**: `asteroides` (spec 05), `tuerca` (spec 07, a falling-pieces
+puzzle with an eighth piece, the nut), `ladrillazo` (spec 08, a brick breaker with the
+reference's sprites and sounds) and `serpentina` (spec 09, a snake on a grid with a timed golden
+fruit; it was a mockup, converted in place) play on a canvas with a live HUD, and their end-of-game
+modal saves the score. The other seven catalog entries (`caida`, `bloque-buster`, `gloton`,
+`invasores`, `rocas`, `ranaria`, `duelo-pixel`) are still mockups: they render the mockup play
+screen, whose HUD shows `0` and whose modal saves nothing.
 
 Features go through a **spec-driven workflow**: `/spec` (write the spec) then `/spec-impl`
 (implement it). Both skills are installed under `.claude/skills/`, and the specs live in
@@ -108,7 +110,10 @@ became `tuerca` and arkanoid became `ladrillazo`; start with `/new-game`, which 
 `app/lib/arcade/<id>/` with an `index.ts` that satisfies `ArcadeGameModule` and add one line to
 `registry.ts`. If the id is new, its catalog entry is **seeded with a migration** that inserts the
 row into `games` (`npm run db:migration add_<id>` with an `insert` including a unique `position`),
-not added to `games.ts`. Both halves are needed: a registered game with no `games` row has no detail
+not added to `games.ts`. **Converting an existing mockup** keeps its id and its row: the migration
+(`npm run db:migration convert_<id>`) is an `update` of that row's texts (`short`, `long`), with
+title, category, cover, color and position untouched, so nothing else in the catalog moves (spec 09,
+`serpentina`, is the precedent). Both halves are needed: a registered game with no `games` row has no detail
 page (`getGame` returns `null` → 404), and a row with no registry entry stays a mockup. Port engines from the
 references with state in the instance (no module-level globals), colors in `constants.ts`, the
 DOM HUD removed from the canvas, and per-frame physics multiplied by `dt`. Verify by playing, with
